@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="author"
+      content="Shalu Pokhrel, Shyam Gopal Shrestha, Anjali Thapa, Sujan Prajapati"
+    />
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+    <link rel="stylesheet" href="../css/admin.css" />
+    <link rel="stylesheet" href="../css/productManagement.css" />
+    <!-- PROTECTED PAGE GUARD: redirects to login if not authenticated -->
+    <script src="../js/auth-guard.js" defer></script>
+  </head>
+  <body>
+    <!-- Header -->
+    <div class="fixed-top-wrapper">
+      <header class="header">
+        <div class="header-left">
+          <img
+            src="../assets/images/logo.jpeg"
+            alt="ShopSphere Logo"
+            class="logo"
+          />
+          <h1>Shop<span>Sphere</span></h1>
+        </div>
+        <h1 id="userGreeting" class="header-right" style="color: black">
+          Hi, User
+        </h1>
+      </header>
+
+      <!-- Navigation Menu -->
+      <nav class="nav-bar">
+        <ul class="nav-menu">
+          <li><a href="admin.html">Dashboard</a></li>
+          <!-- <li><a href="product.html">Home</a></li> -->
+          <li class="dropdown">
+            <a href="#"> <i class="fa-solid fa-user"></i> Account </a>
+            <ul class="dropdown-content">
+              <li><a href="profile.html">My Profile</a></li>
+              <li>
+                <a id="adminLogout"
+                  href="http://localhost/Online-store/php/logout.php?redirect=/Online-store/pages/login.html">
+                  Logout
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Dashboard Layout -->
+    <div class="dashboard-layout">
+      <aside class="sidebar">
+        <h2>Menu</h2>
+        <ul>
+          <li>
+            <a href="../pages/productManagement.html" class="sidebar-link"
+              >Product Management</a
+            >
+          </li>
+          <li>
+            <a href="userManagement.html" class="sidebar-link"
+              >User Management</a
+            >
+          </li>
+          <li>
+            <a href="orderManagement.html" class="sidebar-link"
+              >Order Management</a
+            >
+          </li>
+          <li>
+            <a href="inventoryManagement.html" class="sidebar-link"
+              >Inventory Management</a
+            >
+          </li>
+          <li>
+            <a href="paymentManagement.html" class="sidebar-link"
+              >Payment & Transaction</a
+            >
+          </li>
+          <li>
+            <a href="customerSupport.html" class="sidebar-link"
+              >Customer Support</a
+            >
+          </li>
+        </ul>
+      </aside>
+
+      <main id="dashboardContent">
+        <!-- Default: Dashboard welcome content -->
+        <section class="dashboard-widgets" id="dashboardWelcome">
+          <h2>Welcome to the Admin Dashboard</h2>
+          <p>Select a feature from the sidebar to manage your store.</p>
+        </section>
+
+        <!-- Dynamic content will be loaded here -->
+        <div id="dynamicContent"></div>
+
+        <div id="notification" class="notification"></div>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <p>&copy; 2025 ShopSphere. All rights reserved.</p>
+    </footer>
+
+    <script src="../js/admin.js"></script>
+    <script src="../js/logout.js"></script>
+  </body>
+</html>

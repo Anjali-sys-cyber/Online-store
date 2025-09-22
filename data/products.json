@@ -1,0 +1,152 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Men's Classic Fit Shirt",
+      "category": "mens",
+      "price": 49.99,
+      "description": "Classic cotton shirt with button-down collar",
+      "image": "../assets/images/products/mens-shirt.jpg",
+      "isNew": true,
+      "rating": 4.5,
+      "reviews": 128,
+      "colors": ["White", "Blue", "Black"],
+      "sizes": ["S", "M", "L", "XL"],
+      "inStock": true
+    },
+    {
+      "id": 2,
+      "name": "Women's Summer Dress",
+      "category": "womens",
+      "price": 79.99,
+      "description": "Floral print summer dress with adjustable straps",
+      "image": "../assets/images/products/womens-dress.jpg",
+      "isNew": true,
+      "rating": 4.8,
+      "reviews": 245,
+      "colors": ["Pink", "Yellow", "Blue"],
+      "sizes": ["XS", "S", "M", "L"],
+      "inStock": true
+    },
+    {
+      "id": 3,
+      "name": "Kids' Denim Jeans",
+      "category": "kids",
+      "price": 34.99,
+
+      "description": "Comfortable stretch denim jeans for kids",
+      "image": "../assets/images/products/kids-jeans.jpg",
+      "isNew": false,
+      "rating": 4.6,
+      "reviews": 89,
+      "colors": ["Blue", "Black"],
+      "sizes": ["4Y", "5Y", "6Y", "7Y"],
+      "inStock": true
+    },
+    {
+      "id": 4,
+      "name": "Baby Onesie Set",
+      "category": "baby",
+      "price": 24.99,
+
+      "description": "3-piece cotton onesie set for babies",
+      "image": "../assets/images/products/baby-onesie.jpg",
+      "isNew": true,
+      "rating": 4.9,
+      "reviews": 156,
+      "colors": ["White", "Pink", "Blue"],
+      "sizes": ["0-3M", "3-6M", "6-12M"],
+      "inStock": true
+    },
+    {
+      "id": 5,
+      "name": "Men's Slim Fit Jeans",
+      "category": "mens",
+      "price": 59.99,
+
+      "description": "Stretch denim slim fit jeans",
+      "image": "../assets/images/products/mens-jeans.jpg",
+      "isNew": false,
+      "rating": 4.4,
+      "reviews": 198,
+      "colors": ["Dark Blue", "Black", "Grey"],
+      "sizes": ["30", "32", "34", "36"],
+      "inStock": true
+    },
+    {
+      "id": 6,
+      "name": "Women's Blazer",
+      "category": "womens",
+      "price": 89.99,
+
+      "description": "Professional fitted blazer for women",
+      "image": "../assets/images/products/womens-blazer.jpg",
+      "isNew": false,
+      "rating": 4.7,
+      "reviews": 167,
+      "colors": ["Black", "Navy", "Grey"],
+      "sizes": ["S", "M", "L"],
+      "inStock": true
+    },
+    {
+      "id": 7,
+      "name": "Kids' T-Shirt Pack",
+      "category": "kids",
+      "price": 29.99,
+
+      "description": "3-pack colorful cotton t-shirts",
+      "image": "../assets/images/products/kids-tshirts.jpg",
+      "isNew": true,
+      "rating": 4.5,
+      "reviews": 78,
+      "colors": ["Multicolor"],
+      "sizes": ["4Y", "5Y", "6Y", "7Y"],
+      "inStock": true
+    },
+    {
+      "id": 8,
+      "name": "Baby Winter Set",
+      "category": "baby",
+      "price": 39.99,
+
+      "description": "Warm winter set including hat and mittens",
+      "image": "../assets/images/products/baby-winter.jpg",
+      "isNew": false,
+      "rating": 4.8,
+      "reviews": 92,
+      "colors": ["Pink", "Blue", "White"],
+      "sizes": ["0-3M", "3-6M", "6-12M"],
+      "inStock": true
+    },
+    {
+      "id": 9,
+      "name": "Women's Sneakers",
+      "category": "womens",
+      "price": 69.99,
+
+      "description": "Comfortable casual sneakers",
+      "image": "../assets/images/products/womens-sneakers.jpg",
+      "isNew": true,
+      "rating": 4.6,
+      "reviews": 215,
+      "colors": ["White", "Pink", "Black"],
+      "sizes": ["36", "37", "38", "39", "40"],
+      "inStock": true
+    },
+    {
+      "id": 10,
+      "name": "Men's Leather Jacket",
+      "category": "mens",
+      "price": 149.99,
+
+      "description": "Classic leather motorcycle jacket",
+      "image": "../assets/images/products/mens-jacket.jpg",
+      "isNew": false,
+      "rating": 4.9,
+      "reviews": 178,
+      "colors": ["Black", "Brown"],
+      "sizes": ["M", "L", "XL"],
+      "inStock": true
+    }
+  ]
+}

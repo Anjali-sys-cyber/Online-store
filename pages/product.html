@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="author"
+      content="Shalu Pokhrel, Shyam Gopal Shrestha, Anjali Thapa, Sujan Prajapati"
+    />
+    <title>ShopSphere - Products</title>
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/product.css" />
+    <link rel="stylesheet" href="../css/notification.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="../js/productManager.js" defer></script>
+  </head>
+  <body>
+    <div class="fixed-top-wrapper">
+      <header class="header">
+        <div class="header-left">
+          <img
+            src="../assets/images/logo.jpeg"
+            alt="ShopSphere Logo"
+            class="logo"
+          />
+          <h1>Shop<span>Sphere</span></h1>
+        </div>
+        <div class="header-center">
+          <div class="search-box">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search products..."
+            />
+            <button onclick="searchProduct()">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </div>
+        <div class="header-right">
+          <a href="cart.html" class="cart-link">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-count">0</span>
+            <span class="cart-text">Cart</span>
+            <span class="cart-total">($0.00)</span>
+          </a>
+          <button
+            class="auth-btn login"
+            onclick="window.location.href='login.html'"
+          >
+            <i class="fas fa-user"></i> Login
+          </button>
+          <button
+            class="auth-btn register"
+            onclick="window.location.href='register.html'"
+          >
+            <i class="fas fa-user-plus"></i> Register
+          </button>
+        </div>
+      </header>
+
+      <nav class="nav-bar">
+        <ul class="nav-menu">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="product.html">Products</a></li>
+          <li><a href="about.html">About Us</a></li>
+          <li>
+            <button id="themeToggle">🌙 Toggle Theme</button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <main>
+      <div class="product-controls">
+        <div class="filter-controls">
+          <label for="category">Category:</label>
+          <select id="category">
+            <option value="">All Categories</option>
+            <option value="mens">Men's Clothing</option>
+            <option value="womens">Women's Clothing</option>
+            <option value="kids">Kids' Clothing</option>
+            <option value="baby">Baby Clothing</option>
+          </select>
+
+          <label for="sort">Sort By:</label>
+          <select id="sort">
+            <option value="featured">Featured</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="rating">Customer Rating</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="product-container">
+        <!-- Products will be dynamically loaded here -->
+      </div>
+    </main>
+
+    <!-- Theme Toggle Button -->
+    <button id="themeToggle" class="theme-btn">🌙</button>
+
+    <button id="scrollTopBtn" class="scroll-btn">⬆</button>
+
+    <footer class="footer">
+      <p>&copy; 2025 ShopSphere. All rights reserved.</p>
+    </footer>
+
+    <script src="../js/cartManager.js"></script>
+    <script src="../js/product.js"></script>
+    <script src="../js/utils.js"></script>
+    "
+  </body>
+</html>

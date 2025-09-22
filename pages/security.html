@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="author"
+      content="Shalu Pokhrel, Shyam Gopal Shrestha, Anjali Thapa, Sujan Prajapati"
+    />
+    <title>Security Questions - ShopSphere</title>
+    <link rel="stylesheet" href="../css/styles.css" />
+    <style>
+      .security-container {
+        max-width: 700px;
+        margin: 50px auto;
+        padding: 30px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .security-container h2 {
+        text-align: center;
+        margin-bottom: 25px;
+      }
+
+      label {
+        font-size: 1.1rem;
+        margin-top: 10px;
+        display: block;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        padding: 10px 14px;
+        margin-bottom: 20px;
+        font-size: 1rem;
+        border: 1px solid #bbb;
+        border-radius: 6px;
+      }
+
+      button {
+        width: 100%;
+        padding: 12px;
+        font-size: 1rem;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+
+      button:hover {
+        background-color: #218838;
+      }
+
+      .success-message {
+        text-align: center;
+        padding: 80px 20px;
+      }
+
+      .success-message h2 {
+        color: green;
+        font-size: 2rem;
+        margin-bottom: 20px;
+      }
+
+      .success-message p {
+        font-size: 1.1rem;
+      }
+
+      .success-message button {
+        background-color: #007bff;
+        margin-top: 20px;
+      }
+
+      .success-message button:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <img
+          src="../assets/images/logo.jpeg"
+          alt="ShopSphere Logo"
+          class="logo"
+        />
+        <h1>ShopSphere</h1>
+      </div>
+      <div class="header-center">
+        <h2>Security Questions</h2>
+      </div>
+    </header>
+
+    <!-- Security Questions Form -->
+    <div class="security-container" id="form-container">
+      <h2>Please Answer the Security Questions</h2>
+      <form id="securityForm">
+        <label for="q1">What was your childhood nickname?</label>
+        <input type="text" id="q1" name="q1" required />
+
+        <label for="q2">What is your mother’s maiden name?</label>
+        <input type="text" id="q2" name="q2" required />
+
+        <label for="q3">What was the name of your first pet?</label>
+        <input type="text" id="q3" name="q3" required />
+
+        <button type="submit">Submit Answers</button>
+      </form>
+    </div>
+
+    <!-- Success Message -->
+    <div class="success-message" id="success-message" style="display: none">
+      <h2>Successfully Registered!</h2>
+      <p>Your registration is now complete.</p>
+      <button onclick="window.location.href='login.html'">Go to Login</button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>&copy; 2025 ShopSphere. All rights reserved.</p>
+    </footer>
+
+    <!-- Script -->
+    <script>
+      async function hashAnswer(answer) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(answer);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+      }
+
+      document
+        .getElementById("securityForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const q1 = document.getElementById("q1").value.trim();
+          const q2 = document.getElementById("q2").value.trim();
+          const q3 = document.getElementById("q3").value.trim();
+
+          const pendingData = sessionStorage.getItem("pendingRegistration");
+          const email = sessionStorage.getItem("currentUserEmail");
+
+          if (!pendingData || !email) {
+            alert("Registration session expired. Please register again.");
+            window.location.href = "register.html";
+            return;
+          }
+
+          const userData = JSON.parse(pendingData);
+
+          // Hash security answers
+          const hashedQ1 = await hashAnswer(q1);
+          const hashedQ2 = await hashAnswer(q2);
+          const hashedQ3 = await hashAnswer(q3);
+
+          userData.securityQuestions = {
+            q1: hashedQ1,
+            q2: hashedQ2,
+            q3: hashedQ3,
+          };
+
+          // Save final user data to localStorage
+          localStorage.setItem("user_" + email, JSON.stringify(userData));
+          localStorage.setItem("currentUserEmail", email);
+
+          // Clear temporary session data
+          sessionStorage.removeItem("pendingRegistration");
+
+          // Show success message and hide form
+          document.getElementById("form-container").style.display = "none";
+          document.getElementById("success-message").style.display = "block";
+        });
+    </script>
+  </body>
+</html>

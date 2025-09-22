@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>User Profile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/Online-store/css/common.css" />
+  <link rel="stylesheet" href="/Online-store/css/profile.css" />
+  <style>
+    /* small fallback styles in case profile.css isn't loaded */
+    .profile-container{max-width:980px;margin:6rem auto 2rem;padding:1.25rem;background:#fff;border-radius:14px;box-shadow:0 10px 35px rgba(0,0,0,.08)}
+    .profile-container h2{text-align:center;margin:0 0 1rem 0}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:.75rem 0}
+    .form-col{display:flex;flex-direction:column;gap:.4rem}
+    label{font-weight:600}
+    input[type="text"],input[type="email"],input[type="file"]{padding:.7rem .8rem;border:1px solid #d6d6d6;border-radius:8px}
+    .btn{padding:.6rem .9rem;border:0;background:#1a2797;color:#fff;border-radius:8px;cursor:pointer}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .pf-row button{justify-self:start}
+    .pf-msg{align-self:center;font-size:.9rem}
+    @media (max-width: 720px){.form-row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <!-- Only the <main> is used when this page is loaded inside user.html -->
+  <main id="profilePage">
+    <section class="profile-container">
+      <h2>My Profile</h2>
+
+      <!-- Name & Email -->
+      <div class="form-row pf-row">
+        <div class="form-col">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" />
+        </div>
+        <div class="form-col">
+          <label for="email">Email</label>
+          <input type="email" id="email" />
+        </div>
+      </div>
+
+      <div class="form-row pf-row">
+        <div class="form-col">
+          <button id="pf-save-name" class="btn">Update Name</button>
+          <small class="pf-msg" id="pf-msg-name"></small>
+        </div>
+        <div class="form-col">
+          <button id="pf-save-email" class="btn">Update Email</button>
+          <small class="pf-msg" id="pf-msg-email"></small>
+        </div>
+      </div>
+
+      <!-- Username & Phone -->
+      <div class="form-row pf-row">
+        <div class="form-col">
+          <label for="username">Username</label>
+          <input type="text" id="username" />
+        </div>
+        <div class="form-col">
+          <label for="phone">Phone Number</label>
+          <input type="text" id="phone" />
+        </div>
+      </div>
+
+      <div class="form-row pf-row">
+        <div class="form-col">
+          <button id="pf-save-username" class="btn">Update Username</button>
+          <small class="pf-msg" id="pf-msg-username"></small>
+        </div>
+        <div class="form-col">
+          <button id="pf-save-phone" class="btn">Update Phone</button>
+          <small class="pf-msg" id="pf-msg-phone"></small>
+        </div>
+      </div>
+
+      <!-- Avatar -->
+      <div class="form-row pf-row">
+        <div class="form-col">
+          <label for="profilePic">Profile Picture</label>
+          <input id="profilePic" type="file" accept="image/*" />
+          <img id="previewProfilePic"
+               style="display:none;width:120px;height:120px;border-radius:50%;object-fit:cover;margin-top:10px;" />
+        </div>
+        <div class="form-col" style="align-self:end">
+          <button id="pf-save-avatar" class="btn">Upload Picture</button>
+          <small class="pf-msg" id="pf-msg-avatar"></small>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- If opened directly (not via dashboard), still works -->
+  <script src="/Online-store/js/profile.js" defer></script>
+</body>
+</html>

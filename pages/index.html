@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="author"
+      content="Shalu Pokhrel, Shyam Gopal Shrestha, Anjali Thapa, Sujan Prajapati"
+    />
+    <title>ShopSphere - Home</title>
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="fixed-top-wrapper">
+      <!-- Header -->
+      <header class="header">
+        <!-- Left: Logo -->
+        <div class="header-left">
+          <img
+            src="../assets/images/logo.jpeg"
+            alt="ShopSphere Logo"
+            class="logo"
+          />
+          <h1>Shop<span>Sphere</span></h1>
+        </div>
+
+        <!-- Center: Search bar -->
+        <div class="header-center">
+          <div class="search-box">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search products..."
+            />
+            <button onclick="searchProduct()">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Cart and Auth -->
+        <div class="header-right">
+          <a href="cart.html" class="cart-link">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-count">0</span>
+            <span class="cart-text">Cart</span>
+          </a>
+          <button
+            class="auth-btn login"
+            onclick="window.location.href='login.html'"
+          >
+            <i class="fas fa-user"></i> Login
+          </button>
+          <button
+            class="auth-btn register"
+            onclick="window.location.href='register.html'"
+          >
+            <i class="fas fa-user-plus"></i> Register
+          </button>
+        </div>
+      </header>
+
+      <!-- Navigation Menu -->
+      <nav class="nav-bar">
+        <ul class="nav-menu">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="product.html">Products</a></li>
+          <li><a href="about.html">About Us</a></li>
+          <li>
+            <button id="themeToggle">🌙 Toggle Theme</button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <main>
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="hero-content">
+          <h2>Welcome to ShopSphere</h2>
+          <p>Discover amazing products at great prices</p>
+          <a href="product.html" class="cta-button">Shop Now</a>
+        </div>
+      </section>
+
+      <!-- Featured Products -->
+      <section class="featured-products">
+        <h2>Featured Products</h2>
+        <div class="product-grid" id="featuredProducts">
+          <!-- Products will be loaded dynamically -->
+        </div>
+      </section>
+
+      <!-- Categories Section -->
+      <section class="categories">
+        <h2>Shop by Category</h2>
+        <div class="category-grid">
+          <a href="product.html?category=mens" class="category-card">
+            <div
+              class="category-bg"
+              style="background-image: url('../assets/images/mens.png')"
+            ></div>
+            <h3>Men's Clothing</h3>
+          </a>
+          <a href="product.html?category=womens" class="category-card">
+            <div
+              class="category-bg"
+              style="background-image: url('../assets/images/womens.png')"
+            ></div>
+            <h3>Women's Clothing</h3>
+          </a>
+          <a href="product.html?category=kids" class="category-card">
+            <div
+              class="category-bg"
+              style="background-image: url('../assets/images/kids.png')"
+            ></div>
+            <h3>Kids' Clothing</h3>
+          </a>
+          <a href="product.html?category=baby" class="category-card">
+            <div
+              class="category-bg"
+              style="background-image: url('../assets/images/baby.png')"
+            ></div>
+            <h3>Baby Clothing</h3>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <!-- Scroll to top -->
+    <button id="scrollTopBtn" class="scroll-btn">⬆</button>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>&copy; 2025 ShopSphere. All rights reserved.</p>
+    </footer>
+
+    <script src="../js/utils.js"></script>
+    <script src="../js/index.js"></script>
+    <script src="../js/cartManager.js"></script>
+  </body>
+</html>

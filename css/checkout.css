@@ -1,0 +1,166 @@
+body {
+  font-family: "Lato", sans-serif;
+  background: #f8f8f8;
+  padding: 0;
+  color: #333;
+}
+
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  height: 20px;
+  background: #fff;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.checkout-container {
+  max-width: 900px;
+  margin: 100px auto 20px auto;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+header a {
+  margin-right: 50px;
+  text-decoration: none;
+  color: #007bff;
+  font-weight: 500;
+}
+
+h1 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 30px;
+  letter-spacing: 1px;
+}
+
+h2 {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 5px;
+}
+
+.form-section,
+.order-summary {
+  margin-bottom: 30px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group select {
+  width: 95%;
+  margin: 8px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  font-size: 1rem;
+  transition: 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #000;
+}
+
+.inline {
+  display: flex;
+  gap: 50px;
+}
+
+.order-summary {
+  background: #fafafa;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #eee;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.summary-item.total {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+button {
+  width: 100%;
+  padding: 15px;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #333;
+}
+
+#confirmationMessage {
+  display: none;
+  text-align: center;
+  margin: 24px;
+  padding: 24px;
+  background: #e8f5e9;
+  border-radius: 8px;
+  color: #388e3c;
+  font-size: 1.2em;
+  margin-bottom: 24px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .checkout-container {
+    margin: 120px 1rem 20px;
+    padding: 1.5rem;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  h2 {
+    font-size: 1.1rem;
+  }
+}
+.inline {
+  flex-direction: column;
+  gap: 20px;
+}
+@media (max-width: 480px) {
+  .form-group input,
+  .form-group select {
+    width: 100%;
+  }
+}

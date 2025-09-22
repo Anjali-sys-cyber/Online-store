@@ -1,0 +1,249 @@
+/* ===== Body & Container ===== */
+body {
+  font-family: "Lato", sans-serif;
+  background: #f4f7fc;
+}
+
+.container {
+  max-width: 1100px;
+  margin: auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== Headings ===== */
+h1,
+h2 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+h2 {
+  color: #3498db;
+}
+
+/* ===== Form Styling ===== */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+/* Row with multiple inputs */
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+/* Individual input column */
+.form-col {
+  flex: 1 1 220px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-col label {
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #34495e;
+}
+
+.form-col input,
+.form-col select,
+.form-col textarea {
+  padding: 12px;
+  border: 1px solid #dcdfe6;
+  border-radius: 10px;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: 0.3s;
+}
+
+.form-col input:focus,
+.form-col select:focus,
+.form-col textarea:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.3);
+  outline: none;
+}
+
+/* Description textarea */
+.description-col {
+  flex: 1 1 100%;
+}
+
+.description-col textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Buttons */
+.form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.form-actions button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #3498db;
+  color: #fff;
+  transition: 0.3s;
+}
+
+.form-actions button:hover {
+  background: #2980b9;
+}
+
+/* Product Image Preview */
+.product-preview {
+  display: block;
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  margin-top: 8px;
+  border: 1px solid #dcdfe6;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== Table Styling ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  background: #fff;
+}
+
+table th,
+table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ecf0f1;
+  text-align: center;
+  vertical-align: middle;
+}
+
+table th {
+  background: #3498db;
+  color: #fff;
+  font-weight: 600;
+}
+
+table tr:hover {
+  background: #f1f6fb;
+  transition: 0.3s;
+}
+
+table img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #dcdfe6;
+  transition: 0.3s;
+}
+
+table img:hover {
+  transform: scale(1.05);
+}
+
+/* Action Buttons */
+button.edit-btn,
+button.delete-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  transition: 0.3s;
+}
+
+button.edit-btn {
+  background: #27ae60;
+}
+
+button.edit-btn:hover {
+  background: #1e8449;
+}
+
+button.delete-btn {
+  background: #e74c3c;
+}
+
+button.delete-btn:hover {
+  background: #c0392b;
+}
+
+/* ===== Notification ===== */
+.notification {
+  display: none;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #3498db;
+  color: #fff;
+  padding: 14px 25px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  font-size: 15px;
+  font-weight: 500;
+  z-index: 1000;
+}
+
+/* Search & Header */
+.product-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.product-list-header h2 {
+  margin: 0;
+  font-size: 1.5em;
+  color: #3498db;
+}
+
+.product-list-header .search-input {
+  width: 250px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.product-list-header .search-input:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.3);
+  outline: none;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 900px) {
+  form .form-row {
+    flex-direction: column;
+  }
+
+  table img {
+    width: 50px;
+    height: 50px;
+  }
+
+  .product-list-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

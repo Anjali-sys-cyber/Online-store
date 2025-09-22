@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="author"
+      content="Shalu Pokhrel, Shyam Gopal Shrestha, Anjali Thapa, Sujan Prajapati"
+    />
+    <title>About Us - ShopSphere</title>
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/about.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+  </head>
+  <body>
+    <!-- Header -->
+    <div class="fixed-top-wrapper">
+      <header class="header">
+        <div class="header-left">
+          <img
+            src="../assets/images/logo.jpeg"
+            alt="ShopSphere Logo"
+            class="logo"
+          />
+          <h1>Shop<span>Sphere</span></h1>
+        </div>
+
+        <div class="header-right">
+          <button
+            class="auth-btn login"
+            onclick="window.location.href='login.html'"
+          >
+            <i class="fas fa-user"></i> Login
+          </button>
+          <button
+            class="auth-btn register"
+            onclick="window.location.href='register.html'"
+          >
+            <i class="fas fa-user-plus"></i> Register
+          </button>
+        </div>
+      </header>
+
+      <nav class="nav-bar">
+        <ul class="nav-menu">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="product.html">Products</a></li>
+          <li><a href="about.html">About Us</a></li>
+        </ul>
+      </nav>
+    </div>
+    <main>
+      <!-- About Nav -->
+      <nav class="about-nav" id="aboutNav">
+        <a class="about-link" onclick="showContent('highlights')"
+          >Project Highlights</a
+        >
+        <a class="about-link" onclick="showContent('work')"
+          >Work Distribution and Roles</a
+        >
+
+        <a class="about-link" onclick="showContent('challenges')"
+          >Challenges Faced</a
+        >
+        <a class="about-link" onclick="showContent('references')">References</a>
+        <a class="about-link" onclick="showContent('members')">Group Members</a>
+      </nav>
+
+      <!-- Welcome Message -->
+      <section class="about-content active" id="welcome">
+        <h3>Welcome to ShopSphere</h3>
+        <p>Your One-Stop Destination for Stylish and Affordable Fashion.</p>
+      </section>
+
+      <!-- Sections -->
+      <section class="about-content" id="work">
+        <h3>Work Distribution and Roles</h3>
+        <ul>
+          <li>
+            <strong>Sujan Prajapati:</strong> Designed and implemented the Home
+            Page and User Registration functionality, ensuring responsive design
+            and input validation.
+          </li>
+          <li>
+            <strong>Shalu Pokhrel:</strong> Developed the About Page and Admin
+            Dashboard layout, including sidebar navigation, and styling.
+          </li>
+          <li>
+            <strong>Anjali Thapa:</strong> Handled Checkout and Admin Panel
+            features, integrating order management, inventory overview, and
+            secure transactions.
+          </li>
+          <li>
+            <strong>Shyam Gopal Shrestha:</strong> Implemented
+            Authentication/Authorization, Login/logout feature, Product Page,
+            and Shopping Cart functionality, including session handling and
+            dynamic content Loading.
+          </li>
+        </ul>
+      </section>
+
+      <section class="about-content" id="highlights">
+        <h3>Project Highlights</h3>
+        <ul>
+          <li>
+            <strong>Modern, Responsive E-Commerce Platform:</strong> Developed a
+            fully responsive online clothing store interface,
+            <em>ShopSphere</em>, ensuring cross-browser compatibility.
+          </li>
+          <li>
+            <strong>Dynamic Product Management System:</strong> Admin panel
+            allows adding, editing, deleting, searching, filtering, and sorting
+            products with image upload and live preview. Works seamlessly in
+            both standalone product page and admin dashboard.
+          </li>
+          <li>
+            <strong>Role-Based Access Control:</strong> Implemented admin and
+            user roles with secure login and session handling. Only admins can
+            access dashboard features like product, user, order, and inventory
+            management.
+          </li>
+          <li>
+            <strong>Dynamic Dashboard Loading:</strong> Main content loads
+            dynamically in the admin dashboard to prevent full page reloads.
+            Sidebar navigation works with product management, profile, and other
+            modules.
+          </li>
+          <li>
+            <strong>User-Friendly Features:</strong> Includes scroll-to-top
+            button, theme toggle (light/dark mode) and real-time notifications
+            for actions.
+          </li>
+          <li>
+            <strong>Secure and Modular Codebase:</strong> Passwords hashed with
+            SHA-256, utility functions modularized for reusability, and dynamic
+            JS loading ensures modular management of pages.
+          </li>
+          <li>
+            <strong>Team Collaboration:</strong> Clear division of tasks among
+            team members for home page, about page, dashboard, checkout, and
+            authentication modules. Structured HTML, CSS, and JS ensure
+            maintainable workflow.
+          </li>
+        </ul>
+      </section>
+
+      <section class="about-content" id="challenges">
+        <h3>Challenges Faced</h3>
+        <ul>
+          <li>
+            <strong>Dynamic Content Loading:</strong>While loading product
+            management and profile pages dynamically in the dashboard it becomes
+            very challenging to update the DOM without breaking functionality or
+            losing JS events.
+          </li>
+          <li>
+            <strong>Cross-Page Data Consistency:</strong> Maintaining product
+            list and user session data across multiple pages and admin/user
+            views while avoiding duplication or data loss.
+          </li>
+          <li>
+            <strong>Responsive Design:</strong> Making the website fully
+            responsive across different devices and screen sizes was really
+            challenging.
+          </li>
+          <li>
+            <strong>Dark Mode Implementation:</strong> Ensuring dark mode
+            applies consistently across body and header home and product page
+            was little bit hard.
+          </li>
+          <li>
+            <strong>Image Handling:</strong> Uploading and previewing images
+            locally, handling base64 encoding, and displaying them correctly in
+            both admin and product pages.
+          </li>
+          <li>
+            <strong>Role-Based Access Control:</strong> Securing the admin
+            dashboard and certain features to prevent unauthorized access while
+            managing login sessions effectively was ver hard.
+          </li>
+          <li>
+            <strong>Team Collaboration:</strong> Coordinating between group
+            members developers on different modules like home, checkout,
+            dashboard, and authentication without code conflicts was really
+            challenging.
+          </li>
+          <li>
+            <strong>Frontend Validation and Security:</strong> Validating user
+            input (name, email, password) and hashing passwords using SHA-256 to
+            prevent security vulnerabilities was technical.
+          </li>
+        </ul>
+      </section>
+
+      <section class="about-content" id="references">
+        <h3>References</h3>
+        <ul>
+          <li>
+            <a href="https://www.w3schools.com" target="_blank">W3Schools</a> –
+            For HTML, CSS, and JavaScript examples and guidance.
+          </li>
+          <li>
+            <a href="https://developer.mozilla.org" target="_blank"
+              >MDN Web Docs</a
+            >
+            – For JavaScript APIs, DOM manipulation, and web development best
+            practices.
+          </li>
+          <li>
+            <a href="https://fonts.google.com/" target="_blank">Google Fonts</a>
+            – Fonts used in the website, including Lato.
+          </li>
+          <li>
+            <a href="https://fontawesome.com/" target="_blank">Font Awesome</a>
+            – Icons used in navigation, buttons, and dashboard features.
+          </li>
+          <li>
+            <a href="https://unsplash.com/" target="_blank">Unsplash</a> –
+            Sample product images and placeholder images used during
+            development.
+          </li>
+          <li>
+            <a href="https://www.flaticon.com/" target="_blank">Flaticon</a> –
+            Icons for buttons and notifications (where applicable).
+          </li>
+          <li>
+            <a href="https://css-tricks.com" target="_blank">CSS Tricks</a> –
+            For tips on responsive tables, dark mode, and scroll-to-top
+            functionality.
+          </li>
+          <li>
+            <a href="https://github.com/" target="_blank">GitHub</a> – For
+            version control and team collaboration workflow.
+          </li>
+        </ul>
+      </section>
+
+      <section class="about-content" id="members">
+        <h3>Group Members</h3>
+        <ul>
+          <li>Shalu Pokhrel – CIHE240567</li>
+          <li>Shyam Gopal Shrestha – CIHE240775</li>
+          <li>Anjali Thapa – CIHE240730</li>
+          <li>Sujan Prajapati – CIHE240578</li>
+        </ul>
+      </section>
+    </main>
+    <!-- Footer -->
+    <footer class="footer">
+      <p>&copy; 2025 ShopSphere. All rights reserved.</p>
+    </footer>
+
+    <script src="../js/about.js"></script>
+    <script src="../js/utils.js"></script>
+  </body>
+</html>

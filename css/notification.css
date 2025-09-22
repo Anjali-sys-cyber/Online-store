@@ -1,0 +1,85 @@
+.notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  border-radius: 4px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  font-size: 1rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 300px;
+  animation: slideDown 0.3s ease-out forwards;
+}
+
+.notification.success {
+  background-color: #28a745;
+  color: white;
+  border-left: 4px solid #1e7e34;
+}
+
+.notification.error {
+  background-color: #dc3545;
+  color: white;
+  border-left: 4px solid #bd2130;
+}
+
+.notification.warning {
+  background-color: #ffc107;
+  color: #000;
+  border-left: 4px solid #d39e00;
+}
+
+.notification i {
+  font-size: 1.2rem;
+}
+
+.notification.success i {
+  color: #a7d7b3;
+}
+
+.notification.error i {
+  color: #f5b5bb;
+}
+
+.notification.warning i {
+  color: #b38705;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateX(-50%) translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.notification.hide {
+  animation: fadeOut 0.3s ease-out forwards;
+}
+
+@media (max-width: 768px) {
+  .notification {
+    width: 90%;
+    min-width: unset;
+    max-width: 300px;
+    font-size: 0.9rem;
+    padding: 10px 20px;
+  }
+}

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="author" content="Shalu Pokhrel, Shyam Gopal Shrestha, Anjali Thapa, Sujan Prajapati" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Dashboard</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+    <link rel="stylesheet" href="../css/userDashboard.css" />
+    <link rel="stylesheet" href="../css/product.css" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <!-- ✅ add profile styles so the profile page looks correct inside the dashboard -->
+    <link rel="stylesheet" href="../css/profile.css" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- PROTECTED PAGE GUARD: redirects to login if not authenticated -->
+    <script src="../js/auth-guard.js" defer></script>
+  </head>
+  <body>
+    <!-- Header -->
+    <div class="fixed-top-wrapper">
+      <header class="header">
+        <div class="header-left">
+          <img src="../assets/images/logo.jpeg" alt="ShopSphere Logo" class="logo" />
+          <h1>Shop<span>Sphere</span></h1>
+        </div>
+        <h1 id="userGreeting" class="header-right" style="color: black">Hi, User</h1>
+      </header>
+
+      <!-- Navigation -->
+      <nav class="nav-bar">
+        <ul class="nav-menu">
+          <li><a href="#" data-page="home">Dashboard</a></li>
+          <li><a href="#" data-page="index">Home</a></li>
+          <li><a href="#" data-page="product">Products</a></li>
+          <li class="dropdown">
+            <a href="#"><i class="fa-solid fa-user"></i> Account</a>
+            <ul class="dropdown-content">
+              <li><a href="#" data-page="profile">My Profile</a></li>
+              <li><a href="#" data-page="orders">My Orders</a></li>
+              <li><a href="/Online-store/php/logout.php?redirect=/Online-store/pages/login.html" class="logout-link">Logout</a></li>
+            </ul>
+          </li>
+          <li>
+            <button id="scrollTopBtn" class="scroll-btn">⬆</button>
+            <button id="themeToggle" class="theme-btn">🌙 Toggle Theme</button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Main content (dynamic) -->
+    <main id="dashboardContent">
+      <section id="dashboardWelcome">
+        <h2>Welcome to the User Dashboard</h2>
+        <p>Select an option from the Navbar to enjoy your shopping.</p>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+      <p>&copy; 2025 ShopSphere. All rights reserved.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/utils.js"></script>
+    <script src="../js/cartManager.js"></script>
+    <script src="../js/user.js"></script>
+    <script src="../js/logout.js"></script>
+    <!-- ✅ add profile logic so the injected /pages/profile.html works inside the dashboard -->
+    <script src="../js/profile.js"></script>
+    <script src="../js/auth-guard.js"></script>
+  </body>
+</html>

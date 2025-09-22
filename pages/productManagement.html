@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="author"
+      content="Shalu Pokhrel, Shyam Gopal Shrestha, Anjali Thapa, Sujan Prajapati"
+    />
+    <title>Product Management</title>
+    <link rel="stylesheet" href="../css/productManagement.css" />
+  </head>
+  <body>
+    <div id="productManagementC">
+      <!-- Product Form -->
+      <section class="product-form">
+        <h2 id="formTitle">Add Product</h2>
+        <form id="productForm">
+          <div class="form-row">
+            <div class="form-col">
+              <label for="productName">Name</label>
+              <input type="text" id="productName" required />
+            </div>
+            <div class="form-col">
+              <label for="productPrice">Price ($)</label>
+              <input
+                type="number"
+                id="productPrice"
+                min="0"
+                step="0.01"
+                required
+              />
+            </div>
+            <div class="form-col">
+              <label for="productCategory">Category</label>
+              <select id="productCategory" required>
+                <option value="">Select</option>
+                <option value="Mens">Mens</option>
+                <option value="Womens">Womens</option>
+                <option value="Kids">Kids</option>
+                <option value="Baby">Baby</option>
+              </select>
+            </div>
+            <div class="form-col">
+              <label for="productStock">Stock</label>
+              <input
+                type="number"
+                id="productStock"
+                min="0"
+                step="1"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-col">
+              <label for="productImage">Image</label>
+              <input type="file" id="productImage" accept="image/*" />
+              <img
+                id="previewImg"
+                class="product-preview"
+                src=""
+                alt="Preview"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-col description-col">
+              <label for="productDescription">Description</label>
+              <textarea id="productDescription" rows="3"></textarea>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="saveBtn">Add Product</button>
+            <button type="button" id="cancelEditBtn" style="display: none">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Product List -->
+      <section class="product-list">
+        <div class="product-list-header">
+          <h2>Product List</h2>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search products..."
+            class="search-input"
+          />
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Category</th>
+                <th>Stock</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="productsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <div id="notification" class="notification"></div>
+    </div>
+
+    <script src="../js/productManagement.js"></script>
+  </body>
+</html>
