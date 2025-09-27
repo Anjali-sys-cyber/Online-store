@@ -5,11 +5,13 @@
       this.cartManager = cartManager;
     }
 
+    // Load products from backend (products.php)
     async loadProducts() {
       try {
-        const res = await fetch("../data/products.json");
+        const res = await fetch("../php/products.php?action=read");
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
-        this.products = data.products;
+        this.products = data;
         this.renderProducts(this.products);
       } catch (err) {
         console.error("Failed to load products:", err);
@@ -18,52 +20,63 @@
       }
     }
 
+    // Render products on page
     renderProducts(products) {
       const container = document.querySelector(".product-container");
       if (!container) return;
+
+      if (!products.length) {
+        container.innerHTML = "<p>No products available.</p>";
+        return;
+      }
 
       container.innerHTML = products
         .map(
           (p) => `
         <div class="product-card">
-          <img src="${p.image}" alt="${
-            p.name
-          }" onerror="this.src='../assets/images/placeholder.jpg'">
+          <img src="${p.image ?? "../assets/images/placeholder.jpg"}" 
+               alt="${p.name}" 
+               onerror="this.src='../assets/images/placeholder.jpg'">
           <h3>${p.name}</h3>
-          <p>$${p.price.toFixed(2)}</p>
+          <p>$${parseFloat(p.price).toFixed(2)}</p>
           <button class="add-to-cart-btn" data-id="${p.id}">Add to Cart</button>
         </div>
       `
         )
         .join("");
 
+      // Hook Add to Cart buttons
       container.querySelectorAll(".add-to-cart-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-          const id = parseInt(btn.dataset.id);
-          const product = this.products.find((p) => p.id === id);
+          const id = parseInt(btn.dataset.id, 10);
+          const product = this.products.find((p) => p.id == id);
           if (product && this.cartManager) this.cartManager.addToCart(product);
         });
       });
     }
 
-    filterByCategory(category) {
-      const filtered = category
-        ? this.products.filter((p) => p.category === category)
+    // Filter by category (using category_id)
+    filterByCategory(categoryId) {
+      const filtered = categoryId
+        ? this.products.filter((p) => p.category_id == categoryId)
         : this.products;
       this.renderProducts(filtered);
     }
 
+    // Search by name or description
     searchProducts(query) {
       const filtered = query
         ? this.products.filter(
             (p) =>
               p.name.toLowerCase().includes(query.toLowerCase()) ||
-              p.category.toLowerCase().includes(query.toLowerCase())
+              (p.description &&
+                p.description.toLowerCase().includes(query.toLowerCase()))
           )
         : this.products;
       this.renderProducts(filtered);
     }
 
+    // Sort products
     sortProducts(option) {
       let productsToSort = [...this.products];
       if (option === "price-low")
@@ -79,7 +92,7 @@
 
   // Initialize
   document.addEventListener("DOMContentLoaded", () => {
-    let cartManager = window.cartManager || null; // prevent error if CartManager not defined
+    let cartManager = window.cartManager || null; // Prevent error if CartManager not defined
     const pm = new ProductManager(cartManager);
     pm.loadProducts();
 
