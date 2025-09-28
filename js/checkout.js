@@ -22,7 +22,6 @@
       row.id = id;
       row.className = "summary-item";
       row.innerHTML = `<span>${labelText}</span><span class="value">${valueText}</span>`;
-      // insert just before the total row if present, otherwise append
       const totalRow = containerDiv.querySelector(".summary-item.total");
       if (totalRow) containerDiv.insertBefore(row, totalRow);
       else containerDiv.appendChild(row);
@@ -48,7 +47,6 @@
       li.className = "summary-item";
       li.textContent = "Your cart is empty.";
       list.appendChild(li);
-      // ensure subtotal/tax/total show zeros
       if (orderSummarySection) {
         upsertSummaryRow(
           orderSummarySection,
@@ -87,7 +85,6 @@
     const tax = subtotal * TAX_RATE;
     const total = subtotal + tax;
 
-    // insert or update subtotal/tax rows (before total)
     if (orderSummarySection) {
       upsertSummaryRow(
         orderSummarySection,
@@ -110,7 +107,7 @@
   function handleSubmit(e) {
     e.preventDefault();
     const form = e.currentTarget;
-    // Native validation
+
     if (!form.checkValidity()) {
       form.reportValidity();
       return;
@@ -122,9 +119,14 @@
       return;
     }
 
+    // collect inputs
     const name = document.getElementById("name").value.trim();
     const email = document.getElementById("email").value.trim();
     const address = document.getElementById("address").value.trim();
+    const city = document.getElementById("city").value.trim();
+    const postcode = document.getElementById("postcode").value.trim();
+    const country = document.getElementById("country").value.trim();
+
     const totalText = document.getElementById("totalAmount").textContent;
     const subtotalText =
       document.getElementById("subtotalRow")?.querySelector(".value")
@@ -133,33 +135,43 @@
       document.getElementById("taxRow")?.querySelector(".value")?.textContent ||
       "$0.00";
 
-    // Save order record (simple localStorage queue)
-    try {
-      const orders = JSON.parse(localStorage.getItem("orders") || "[]");
-      orders.push({
-        id: "ORD-" + Date.now(),
-        when: new Date().toISOString(),
-        items: cart,
-        subtotal: subtotalText,
-        tax: taxText,
-        total: totalText,
-        customer: { name, email, address },
-      });
-      localStorage.setItem("orders", JSON.stringify(orders));
-    } catch (err) {
-      console.warn("Could not save order to localStorage", err);
-    }
+    // build order data
+    const orderData = {
+      guest_name: name,
+      guest_email: email,
+      guest_address: `${address}, ${city} ${postcode}, ${country}`,
+      subtotal: subtotalText.replace("$", ""),
+      tax: taxText.replace("$", ""),
+      total: totalText.replace("$", ""),
+      items: cart.map((item) => ({
+        product_id: item.id,
+        product_name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        line_total: (item.quantity * item.price).toFixed(2),
+      })),
+    };
 
-    // Clear cart and show confirmation
-    localStorage.removeItem("cart");
-    form.style.display = "none";
-    const msg = document.getElementById("confirmationMessage");
-    msg.innerHTML = `✅ Thank you, <strong>${name}</strong>! Your order of <strong>${totalText}</strong> has been placed successfully. A confirmation was sent to <strong>${email}</strong>.`;
-    msg.style.display = "block";
-
-    // update summary (now empty)
-    renderOrderSummary();
-  }
+    fetch("../php/placeOrder.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orderData),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          localStorage.removeItem("cart");
+          form.style.display = "none";
+          const msg = document.getElementById("confirmationMessage");
+          msg.innerHTML = `✅ Thank you, <strong>${name}</strong>! Your order of <strong>${totalText}</strong> has been placed successfully.`;
+          msg.style.display = "block";
+          renderOrderSummary();
+        } else {
+          alert("Order failed: " + data.message);
+        }
+      })
+      .catch((err) => console.error("Order error", err));
+  } // <-- properly closed handleSubmit
 
   // ====== init ======
   document.addEventListener("DOMContentLoaded", () => {

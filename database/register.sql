@@ -96,6 +96,14 @@ CREATE TABLE `order_items` (
   `line_total` decimal(10,2) NOT NULL
 )
 
+---------------------Table updates------------------------------------
+ALTER TABLE cart 
+  MODIFY id INT(11) NOT NULL AUTO_INCREMENT;
 
+ALTER TABLE orders 
+  MODIFY order_id INT(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE order_items 
+  MODIFY order_item_id INT(11) NOT NULL AUTO_INCREMENT;
 
 
