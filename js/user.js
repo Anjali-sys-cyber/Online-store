@@ -1,25 +1,38 @@
 const dashboardContent = document.getElementById("dashboardContent");
 
-// ===== Greeting (same as before) =====
+// ===== Greeting =====
 function getLoggedInUser() {
-  try { return JSON.parse(localStorage.getItem("user") || "null"); }
-  catch { return null; }
+  try {
+    return JSON.parse(localStorage.getItem("user") || "null");
+  } catch {
+    return null;
+  }
 }
+
 const currentUser = getLoggedInUser();
 const greetingElement = document.getElementById("userGreeting");
 if (greetingElement) {
   greetingElement.textContent =
     currentUser && currentUser.name ? `Hi, ${currentUser.name}` : "Hi, User";
 }
-fetch("/Online-store/php/me.php", { credentials: "include" })
-  .then(r => r.json()).then(d => {
-    if (d && d.ok && greetingElement) {
-      const name = [d.first_name||"", d.last_name||""].filter(Boolean).join(" ").trim();
-      greetingElement.textContent = name ? `Hi, ${name}` : `Hi, ${d.username || "User"}`;
-    }
-  }).catch(() => {});
 
-// ===== Routes (unchanged) =====
+// fetch latest user info
+fetch("/Online-store/php/me.php", { credentials: "include" })
+  .then((r) => r.json())
+  .then((d) => {
+    if (d && d.ok && greetingElement) {
+      const name = [d.first_name || "", d.last_name || ""]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+      greetingElement.textContent = name
+        ? `Hi, ${name}`
+        : `Hi, ${d.username || "User"}`;
+    }
+  })
+  .catch(() => {});
+
+// ===== Routes =====
 const ROUTES = {
   home: null,
   index: "/Online-store/pages/index.html",
@@ -28,61 +41,168 @@ const ROUTES = {
   orders: "/Online-store/pages/orders.html",
 };
 
-/* ===== NEW: read-only profile renderer ===== */
+// ===== Product Renderer Class =====
+class ProductRenderer {
+  constructor(containerSelector, cartManager) {
+    this.container = document.querySelector(containerSelector);
+    this.cartManager = cartManager;
+    this.products = [];
+  }
+
+  async loadProducts({ limit = null, sortByNew = false } = {}) {
+    if (!this.container) return;
+
+    try {
+      const res = await fetch("/Online-store/php/products.php?action=read");
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+
+      // Handle both raw array and wrapped { products: [...] }
+      this.products = Array.isArray(data) ? data : data.products || [];
+
+      let productsToRender = [...this.products];
+      if (sortByNew)
+        productsToRender.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+      if (limit) productsToRender = productsToRender.slice(0, limit);
+
+      this.renderProducts(productsToRender);
+    } catch (err) {
+      console.error("Failed to load products:", err);
+      if (this.container)
+        this.container.innerHTML = "<p>Failed to load products.</p>";
+    }
+  }
+
+  renderProducts(products) {
+    if (!this.container) return;
+
+    this.container.innerHTML = products
+      .map(
+        (p) => `
+      <div class="product-card">
+        ${p.isNew ? '<div class="product-badge">New</div>' : ""}
+        <div class="product-image">
+          <img src="${p.image}" alt="${
+          p.name
+        }" onerror="this.src='../assets/images/placeholder.jpg'">
+        </div>
+        <div class="product-details">
+          <h3>${p.name}</h3>
+          <p>$${parseFloat(p.price).toFixed(2)}</p>
+          <button class="add-to-cart-btn" data-id="${p.id}">Add to Cart</button>
+        </div>
+      </div>
+    `
+      )
+      .join("");
+
+    this.container.querySelectorAll(".add-to-cart-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = parseInt(btn.dataset.id);
+        const product = products.find((p) => p.id === id);
+        if (product) this.cartManager?.addToCart(product);
+      });
+    });
+  }
+
+  filterByCategory(category) {
+    const filtered = category
+      ? this.products.filter(
+          (p) => p.category?.toLowerCase() === category.toLowerCase()
+        )
+      : this.products;
+    this.renderProducts(filtered);
+  }
+
+  searchProducts(query) {
+    const filtered = query
+      ? this.products.filter(
+          (p) =>
+            p.name.toLowerCase().includes(query.toLowerCase()) ||
+            p.category?.toLowerCase().includes(query.toLowerCase())
+        )
+      : this.products;
+    this.renderProducts(filtered);
+  }
+
+  sortProducts(option) {
+    let productsToSort = [...this.products];
+    if (option === "price-low")
+      productsToSort.sort((a, b) => a.price - b.price);
+    else if (option === "price-high")
+      productsToSort.sort((a, b) => b.price - a.price);
+    else if (option === "rating")
+      productsToSort.sort((a, b) => b.rating - a.rating);
+    this.renderProducts(productsToSort);
+  }
+}
+
+// ===== Profile Renderer =====
 function renderProfileView() {
   dashboardContent.innerHTML = `
     <section class="profile-container" style="max-width:980px;margin:6rem auto 2rem;padding:1.25rem;background:#fff;border-radius:14px;box-shadow:0 10px 35px rgba(0,0,0,.08)">
       <h2 style="text-align:center;margin:0 0 1rem 0">My Profile</h2>
 
       <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:.75rem 0">
-        <div class="form-col" style="display:flex;flex-direction:column;gap:.4rem">
-          <label style="font-weight:600">Full Name</label>
-          <div id="ro-fullName" class="ro-field" style="padding:.7rem .8rem;border:1px solid #d6d6d6;border-radius:8px;background:#f7f7f7">—</div>
-        </div>
-        <div class="form-col" style="display:flex;flex-direction:column;gap:.4rem">
-          <label style="font-weight:600">Email</label>
-          <div id="ro-email" class="ro-field" style="padding:.7rem .8rem;border:1px solid #d6d6d6;border-radius:8px;background:#f7f7f7">—</div>
-        </div>
+        <div class="form-col"><label>Full Name</label><div id="ro-fullName" class="ro-field">—</div></div>
+        <div class="form-col"><label>Email</label><div id="ro-email" class="ro-field">—</div></div>
       </div>
 
       <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:.75rem 0">
-        <div class="form-col" style="display:flex;flex-direction:column;gap:.4rem">
-          <label style="font-weight:600">Username</label>
-          <div id="ro-username" class="ro-field" style="padding:.7rem .8rem;border:1px solid #d6d6d6;border-radius:8px;background:#f7f7f7">—</div>
-        </div>
-        <div class="form-col" style="display:flex;flex-direction:column;gap:.4rem">
-          <label style="font-weight:600">Phone Number</label>
-          <div id="ro-phone" class="ro-field" style="padding:.7rem .8rem;border:1px solid #d6d6d6;border-radius:8px;background:#f7f7f7">—</div>
-        </div>
+        <div class="form-col"><label>Username</label><div id="ro-username" class="ro-field">—</div></div>
+        <div class="form-col"><label>Phone Number</label><div id="ro-phone" class="ro-field">—</div></div>
       </div>
 
       <div style="margin-top:1rem;display:flex;justify-content:flex-end">
-        <a href="/Online-store/pages/profile.html"
-           class="btn"
-           style="padding:.6rem .9rem;border:0;background:#1a2797;color:#fff;border-radius:8px;text-decoration:none">
-          Update Profile
-        </a>
+        <a href="/Online-store/pages/profile.html" class="btn">Update Profile</a>
       </div>
     </section>
   `;
 
   fetch("/Online-store/php/me.php", { credentials: "include" })
-    .then(r => r.json())
-    .then(me => {
+    .then((r) => r.json())
+    .then((me) => {
       if (!me || !me.ok) return;
-      const full = [me.first_name||"", me.last_name||""].filter(Boolean).join(" ").trim();
-      const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v && String(v).trim() ? v : "—"; };
+      const full = [me.first_name || "", me.last_name || ""]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+      const set = (id, v) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = v || "—";
+      };
       set("ro-fullName", full || me.username || "—");
       set("ro-email", me.email || "—");
       set("ro-username", me.username || "—");
-      set("ro-phone", (typeof me.phone !== "undefined" && me.phone) ? me.phone : "—");
-    }).catch(() => {});
+      set("ro-phone", me.phone || "—");
+    })
+    .catch(() => {});
 }
 
-/* ===== Router ===== */
+// ===== Home Dashboard with Featured Products =====
+function renderHomeDashboard() {
+  dashboardContent.innerHTML = `
+    <section class="dashboard-home" style="max-width:1200px;margin:6rem auto 2rem;padding:1rem;">
+      <h2 id="userGreeting">Hi, User!</h2>
+      <p>Check out some of our featured products:</p>
+      <div class="product-container" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;"></div>
+    </section>
+  `;
+
+  const renderer = new ProductRenderer(
+    ".product-container",
+    window.cartManager
+  );
+  renderer.loadProducts({ limit: 6, sortByNew: true });
+}
+
+// ===== Router =====
 async function loadPage(pageName) {
-  // Show the profile for Dashboard (home) and for My Profile
-  if (pageName === "home" || pageName === "profile") {
+  if (pageName === "home") {
+    renderHomeDashboard();
+    return;
+  }
+  if (pageName === "profile") {
     renderProfileView();
     return;
   }
@@ -90,12 +210,15 @@ async function loadPage(pageName) {
   const url = ROUTES[pageName] || `/Online-store/pages/${pageName}.html`;
   try {
     const response = await fetch(url, { credentials: "include" });
-    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    if (!response.ok)
+      throw new Error(`${response.status} ${response.statusText}`);
     const htmlText = await response.text();
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = htmlText;
     const mainContent = tempDiv.querySelector("main") || tempDiv;
     dashboardContent.innerHTML = mainContent.innerHTML;
+
+    // Re-run scripts inside the loaded page
     tempDiv.querySelectorAll("script").forEach((script) => {
       if (!script.src) {
         const s = document.createElement("script");
@@ -103,6 +226,32 @@ async function loadPage(pageName) {
         document.body.appendChild(s);
       }
     });
+
+    // If this is the product page, initialize the product renderer
+    if (pageName === "product") {
+      const renderer = new ProductRenderer(
+        ".product-container",
+        window.cartManager
+      );
+      renderer.loadProducts();
+
+      const searchInput = document.getElementById("searchInput");
+      const categorySelect = document.getElementById("category");
+      const sortSelect = document.getElementById("sort");
+
+      if (searchInput)
+        searchInput.addEventListener("input", (e) =>
+          renderer.searchProducts(e.target.value)
+        );
+      if (categorySelect)
+        categorySelect.addEventListener("change", (e) =>
+          renderer.filterByCategory(e.target.value)
+        );
+      if (sortSelect)
+        sortSelect.addEventListener("change", (e) =>
+          renderer.sortProducts(e.target.value)
+        );
+    }
   } catch (error) {
     console.error("Error loading page:", url, error);
     dashboardContent.innerHTML = `
@@ -115,6 +264,7 @@ async function loadPage(pageName) {
   }
 }
 
+// ===== Navigation =====
 function initNavigation() {
   document.querySelectorAll(".nav-menu a[data-page]").forEach((link) => {
     link.addEventListener("click", (e) => {
@@ -124,7 +274,13 @@ function initNavigation() {
   });
 }
 
+// ===== Initialize Dashboard =====
 document.addEventListener("DOMContentLoaded", () => {
+  // Ensure cartManager exists
+  window.cartManager = window.cartManager || {
+    addToCart: (product) => alert("Cart not initialized yet."),
+  };
+
   initNavigation();
-  loadPage("home"); // Dashboard now renders the profile view
+  loadPage("home"); // default: Home with featured products
 });

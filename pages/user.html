@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="author" content="Shalu Pokhrel, Shyam Gopal Shrestha, Anjali Thapa, Sujan Prajapati" />
+    <meta
+      name="author"
+      content="Shalu Pokhrel, Shyam Gopal Shrestha, Anjali Thapa, Sujan Prajapati"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>User Dashboard</title>
 
@@ -15,7 +18,10 @@
     <!-- ✅ add profile styles so the profile page looks correct inside the dashboard -->
     <link rel="stylesheet" href="../css/profile.css" />
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
 
     <!-- PROTECTED PAGE GUARD: redirects to login if not authenticated -->
     <script src="../js/auth-guard.js" defer></script>
@@ -25,10 +31,22 @@
     <div class="fixed-top-wrapper">
       <header class="header">
         <div class="header-left">
-          <img src="../assets/images/logo.jpeg" alt="ShopSphere Logo" class="logo" />
+          <img
+            src="../assets/images/logo.jpeg"
+            alt="ShopSphere Logo"
+            class="logo"
+          />
           <h1>Shop<span>Sphere</span></h1>
         </div>
-        <h1 id="userGreeting" class="header-right" style="color: black">Hi, User</h1>
+        <div class="header-left">
+          <h1 id="userGreeting" style="color: black">Hi, User</h1>
+          <a href="cart.html" class="cart-link">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-count">0</span>
+            <span class="cart-text">Cart</span>
+            <span class="cart-total">($0.00)</span>
+          </a>
+        </div>
       </header>
 
       <!-- Navigation -->
@@ -42,7 +60,13 @@
             <ul class="dropdown-content">
               <li><a href="#" data-page="profile">My Profile</a></li>
               <li><a href="#" data-page="orders">My Orders</a></li>
-              <li><a href="/Online-store/php/logout.php?redirect=/Online-store/pages/login.html" class="logout-link">Logout</a></li>
+              <li>
+                <a
+                  href="/Online-store/php/logout.php?redirect=/Online-store/pages/login.html"
+                  class="logout-link"
+                  >Logout</a
+                >
+              </li>
             </ul>
           </li>
           <li>

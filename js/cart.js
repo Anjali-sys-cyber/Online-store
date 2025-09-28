@@ -43,35 +43,37 @@ class CartPage {
     if (!this.cartContainer) return;
 
     if (this.cartItems.length === 0) {
-      this.cartContainer.parentElement.classList.add("hidden");
+      this.cartContainer.parentElement?.classList.add("hidden");
       this.emptyCartEl?.classList.remove("hidden");
       this.updateTotals();
       return;
     }
 
-    this.cartContainer.parentElement.classList.remove("hidden");
+    this.cartContainer.parentElement?.classList.remove("hidden");
     this.emptyCartEl?.classList.add("hidden");
 
     this.cartContainer.innerHTML = this.cartItems
-      .map(
-        (item) => `
-      <div class="cart-item" data-id="${item.id}">
-        <img src="${item.image}" alt="${item.name}">
-        <div class="item-details">
-          <h4>${item.name}</h4>
-          <p class="price">$${item.price.toFixed(2)}</p>
-          <div class="quantity-controls">
-            <button class="decrease-btn">-</button>
-            <span class="quantity">${item.quantity}</span>
-            <button class="increase-btn">+</button>
+      .map((item) => {
+        const price = Number(item.price) || 0;
+        const quantity = Number(item.quantity) || 1;
+        return `
+          <div class="cart-item" data-id="${item.id}">
+            <img src="${item.image}" alt="${item.name}">
+            <div class="item-details">
+              <h4>${item.name}</h4>
+              <p class="price">$${price.toFixed(2)}</p>
+              <div class="quantity-controls">
+                <button class="decrease-btn">-</button>
+                <span class="quantity">${quantity}</span>
+                <button class="increase-btn">+</button>
+              </div>
+              <button class="remove-btn">
+                <i class="fas fa-trash"></i> Remove
+              </button>
+            </div>
           </div>
-          <button class="remove-btn">
-            <i class="fas fa-trash"></i> Remove
-          </button>
-        </div>
-      </div>
-    `
-      )
+        `;
+      })
       .join("");
 
     this.updateTotals();
@@ -81,7 +83,7 @@ class CartPage {
     const item = this.cartItems.find((i) => i.id === id);
     if (!item) return;
 
-    item.quantity += delta;
+    item.quantity = (Number(item.quantity) || 1) + delta;
     if (item.quantity <= 0) this.removeItem(id);
     else {
       this.saveCart();
@@ -100,10 +102,14 @@ class CartPage {
   }
 
   updateTotals() {
-    const subtotal = this.cartItems.reduce(
-      (sum, i) => sum + i.price * i.quantity,
-      0
-    );
+    let subtotal = 0;
+
+    this.cartItems.forEach((item) => {
+      const price = Number(item.price) || 0;
+      const quantity = Number(item.quantity) || 1;
+      subtotal += price * quantity;
+    });
+
     const tax = subtotal * 0.1;
     const total = subtotal + tax;
 
@@ -118,7 +124,6 @@ class CartPage {
       alert("Your cart is empty!");
       return;
     }
-    // Redirect to checkout page
     window.location.href = "checkout.html";
   }
 }
