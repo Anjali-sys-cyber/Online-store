@@ -16,7 +16,7 @@ if (greetingElement) {
     currentUser && currentUser.name ? `Hi, ${currentUser.name}` : "Hi, User";
 }
 
-// fetch latest user info
+// fetch latest user info from PHP
 fetch("/Online-store/php/me.php", { credentials: "include" })
   .then((r) => r.json())
   .then((d) => {
@@ -32,13 +32,13 @@ fetch("/Online-store/php/me.php", { credentials: "include" })
   })
   .catch(() => {});
 
-// ===== Routes =====
+// ===== Routes (map to actual files you have) =====
 const ROUTES = {
-  home: null,
-  index: "/Online-store/pages/index.html",
-  product: "/Online-store/pages/product.html",
-  profile: "/Online-store/pages/profile.html",
-  orders: "/Online-store/pages/orders.html",
+  dashboard: null, // inline welcome section
+  homeContent: "homeContent.html", // ✅ avoid conflict with dashboard
+  product: "product.html",
+  profile: "profile.html",
+  orders: "orders.html", // create this file if not present
 };
 
 // ===== Product Renderer Class =====
@@ -57,7 +57,6 @@ class ProductRenderer {
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
 
-      // Handle both raw array and wrapped { products: [...] }
       this.products = Array.isArray(data) ? data : data.products || [];
 
       let productsToRender = [...this.products];
@@ -180,15 +179,43 @@ function renderProfileView() {
 }
 
 // ===== Home Dashboard with Featured Products =====
+// ===== Home Dashboard with Featured Products =====
 function renderHomeDashboard() {
   dashboardContent.innerHTML = `
     <section class="dashboard-home" style="max-width:1200px;margin:6rem auto 2rem;padding:1rem;">
-      <h2 id="userGreeting">Hi, User!</h2>
+      <h2 id="homeGreeting">Hi, User!</h2>
       <p>Check out some of our featured products:</p>
       <div class="product-container" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;"></div>
     </section>
   `;
 
+  // 🔑 fetch live user info for greeting
+  fetch("/Online-store/php/me.php", { credentials: "include" })
+    .then((r) => r.json())
+    .then((d) => {
+      if (d && d.ok) {
+        const name = [d.first_name || "", d.last_name || ""]
+          .filter(Boolean)
+          .join(" ")
+          .trim();
+        const greet = document.getElementById("homeGreeting");
+        if (greet) {
+          greet.textContent = name
+            ? `Hi, ${name}!`
+            : `Hi, ${d.username || "User"}!`;
+        }
+      }
+    })
+    .catch(() => {
+      // fallback from localStorage
+      const user = getLoggedInUser();
+      const greet = document.getElementById("homeGreeting");
+      if (greet && user) {
+        greet.textContent = user.name ? `Hi, ${user.name}!` : "Hi, User!";
+      }
+    });
+
+  // render featured products
   const renderer = new ProductRenderer(
     ".product-container",
     window.cartManager
@@ -198,7 +225,16 @@ function renderHomeDashboard() {
 
 // ===== Router =====
 async function loadPage(pageName) {
-  if (pageName === "home") {
+  if (pageName === "dashboard") {
+    dashboardContent.innerHTML = `
+      <section id="dashboardWelcome">
+        <h2>Welcome to the User Dashboard</h2>
+        <p>Select an option from the Navbar to enjoy your shopping.</p>
+      </section>
+    `;
+    return;
+  }
+  if (pageName === "homeContent") {
     renderHomeDashboard();
     return;
   }
@@ -207,7 +243,13 @@ async function loadPage(pageName) {
     return;
   }
 
-  const url = ROUTES[pageName] || `/Online-store/pages/${pageName}.html`;
+  const fileToLoad = ROUTES[pageName];
+  if (!fileToLoad) {
+    dashboardContent.innerHTML = `<p style="color:red;">⚠️ Page not mapped: ${pageName}</p>`;
+    return;
+  }
+
+  const url = `/Online-store/pages/${fileToLoad}`;
   try {
     const response = await fetch(url, { credentials: "include" });
     if (!response.ok)
@@ -217,15 +259,6 @@ async function loadPage(pageName) {
     tempDiv.innerHTML = htmlText;
     const mainContent = tempDiv.querySelector("main") || tempDiv;
     dashboardContent.innerHTML = mainContent.innerHTML;
-
-    // Re-run scripts inside the loaded page
-    tempDiv.querySelectorAll("script").forEach((script) => {
-      if (!script.src) {
-        const s = document.createElement("script");
-        s.textContent = script.textContent;
-        document.body.appendChild(s);
-      }
-    });
 
     // If this is the product page, initialize the product renderer
     if (pageName === "product") {
@@ -276,11 +309,10 @@ function initNavigation() {
 
 // ===== Initialize Dashboard =====
 document.addEventListener("DOMContentLoaded", () => {
-  // Ensure cartManager exists
   window.cartManager = window.cartManager || {
     addToCart: (product) => alert("Cart not initialized yet."),
   };
 
   initNavigation();
-  loadPage("home"); // default: Home with featured products
+  loadPage("dashboard"); // ✅ start at dashboard, not homeContent
 });

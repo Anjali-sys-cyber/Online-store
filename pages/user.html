@@ -15,7 +15,6 @@
     <link rel="stylesheet" href="../css/userDashboard.css" />
     <link rel="stylesheet" href="../css/product.css" />
     <link rel="stylesheet" href="../css/style.css" />
-    <!-- ✅ add profile styles so the profile page looks correct inside the dashboard -->
     <link rel="stylesheet" href="../css/profile.css" />
 
     <link
@@ -23,7 +22,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
 
-    <!-- PROTECTED PAGE GUARD: redirects to login if not authenticated -->
+    <!-- PROTECTED PAGE GUARD -->
     <script src="../js/auth-guard.js" defer></script>
   </head>
   <body>
@@ -52,8 +51,9 @@
       <!-- Navigation -->
       <nav class="nav-bar">
         <ul class="nav-menu">
-          <li><a href="#" data-page="home">Dashboard</a></li>
-          <li><a href="#" data-page="index">Home</a></li>
+          <li><a href="#" data-page="dashboard">Dashboard</a></li>
+          <li><a href="#" data-page="homeContent">Home</a></li>
+          <!-- ✅ changed -->
           <li><a href="#" data-page="product">Products</a></li>
           <li class="dropdown">
             <a href="#"><i class="fa-solid fa-user"></i> Account</a>
@@ -62,8 +62,8 @@
               <li><a href="#" data-page="orders">My Orders</a></li>
               <li>
                 <a
+                  id="logoutLink"
                   href="/Online-store/php/logout.php?redirect=/Online-store/pages/login.html"
-                  class="logout-link"
                   >Logout</a
                 >
               </li>
@@ -95,7 +95,6 @@
     <script src="../js/cartManager.js"></script>
     <script src="../js/user.js"></script>
     <script src="../js/logout.js"></script>
-    <!-- ✅ add profile logic so the injected /pages/profile.html works inside the dashboard -->
     <script src="../js/profile.js"></script>
     <script src="../js/auth-guard.js"></script>
   </body>

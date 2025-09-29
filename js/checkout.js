@@ -162,9 +162,11 @@
         if (data.success) {
           localStorage.removeItem("cart");
           form.style.display = "none";
+
           const msg = document.getElementById("confirmationMessage");
           msg.innerHTML = `✅ Thank you, <strong>${name}</strong>! Your order of <strong>${totalText}</strong> has been placed successfully.`;
-          msg.style.display = "block";
+          msg.style.display = "block"; // show it only now
+
           renderOrderSummary();
         } else {
           alert("Order failed: " + data.message);
