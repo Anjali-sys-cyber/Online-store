@@ -1,9 +1,9 @@
-// /Online-store/js/user.js — SAFE ROUTER + PRODUCT + ORDERS with collapsible items
+// /Online-store/js/user.js — SAFE ROUTER + PRODUCT + ORDERS (scoped)
 (() => {
   const dashboardContent = document.getElementById("dashboardContent");
   if (!dashboardContent) return;
 
-  // ----- helpers -----
+  // ---- helpers ----
   const esc = (s) =>
     String(s ?? "").replace(
       /[&<>"']/g,
@@ -18,36 +18,10 @@
     );
   const money = (n) => `$${Number(n || 0).toFixed(2)}`;
 
-  // ----- greeting -----
-  function getLoggedInUser() {
-    try {
-      return JSON.parse(localStorage.getItem("user") || "null");
-    } catch {
-      return null;
-    }
-  }
-  const greetingElement = document.getElementById("userGreeting");
-  (function initGreeting() {
-    const u = getLoggedInUser();
-    if (greetingElement) {
-      greetingElement.textContent = u && u.name ? `Hi, ${u.name}` : "Hi, User";
-    }
-    fetch("/Online-store/php/me.php", { credentials: "include" })
-      .then((r) => r.json())
-      .then((d) => {
-        if (!d || !d.ok || !greetingElement) return;
-        const full = [d.first_name || "", d.last_name || ""]
-          .filter(Boolean)
-          .join(" ")
-          .trim();
-        greetingElement.textContent = full
-          ? `Hi, ${full}`
-          : `Hi, ${d.username || "User"}`;
-      })
-      .catch(() => {});
-  })();
+  // keep reference for header search/filter
+  let activeRenderer = null;
 
-  // ----- Product renderer -----
+  // ---- Product Renderer ----
   class ProductRenderer {
     constructor(containerSelector, cartManager) {
       this.containerSelector = containerSelector;
@@ -58,7 +32,7 @@
       return dashboardContent.querySelector(this.containerSelector);
     }
 
-    async loadProducts({ limit = null, sortByNew = false } = {}) {
+    async loadProducts() {
       if (!this.container) return;
       try {
         const res = await fetch("/Online-store/php/products.php?action=read", {
@@ -67,13 +41,9 @@
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         this.products = Array.isArray(data) ? data : data.products || [];
-        let list = [...this.products];
-        if (sortByNew)
-          list.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
-        if (limit) list = list.slice(0, limit);
-        this.renderProducts(list);
-      } catch (e) {
-        console.error("[user.js] loadProducts failed:", e);
+        this.renderProducts(this.products);
+      } catch (err) {
+        console.error("[user.js] loadProducts failed:", err);
         this.container.innerHTML = "<p>Failed to load products.</p>";
       }
     }
@@ -87,25 +57,25 @@
       this.container.innerHTML = list
         .map(
           (p) => `
-        <div class="product-card">
-          ${p.isNew ? '<div class="product-badge">New</div>' : ""}
-          <div class="product-image">
-            <img src="${esc(p.image)}" alt="${esc(p.name)}"
-                 onerror="this.src='../assets/images/placeholder.jpg'">
+          <div class="product-card">
+            ${p.isNew ? '<div class="product-badge">New</div>' : ""}
+            <div class="product-image">
+              <img src="${esc(p.image)}" alt="${esc(p.name)}"
+                   onerror="this.src='../assets/images/placeholder.jpg'">
+            </div>
+            <div class="product-details">
+              <h3>${esc(p.name)}</h3>
+              <p class="price"><span>${money(p.price)}</span></p>
+              <button class="add-to-cart-btn" data-id="${p.id}">
+                <i class="fas fa-shopping-cart"></i> Add to Cart
+              </button>
+            </div>
           </div>
-          <div class="product-details">
-            <h3>${esc(p.name)}</h3>
-            <p class="price"><span class="price-amount">${money(
-              p.price
-            )}</span></p>
-            <button class="add-to-cart-btn" data-id="${p.id}">
-              <i class="fas fa-shopping-cart"></i> Add to Cart
-            </button>
-          </div>
-        </div>`
+        `
         )
         .join("");
 
+      // bind add-to-cart
       this.container.querySelectorAll(".add-to-cart-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
           const id = Number(btn.dataset.id);
@@ -113,10 +83,70 @@
           if (product && this.cartManager?.addToCart) {
             this.cartManager.addToCart(product);
           } else {
-            alert("Cart is not available on this page.");
+            alert("Cart is not available.");
           }
         });
       });
+    }
+
+    filterByCategory(val) {
+      const raw = (val ?? "").toString().trim().toLowerCase();
+
+      // Category mapping from DB → frontend slugs
+      const CAT_ID_TO_SLUG = { 1: "mens", 2: "womens", 3: "kids", 4: "baby" };
+
+      // Normalize user input / <select> values
+      const CAT_LABEL_TO_SLUG = {
+        "": "",
+        all: "all",
+        "all categories": "all",
+        mens: "mens",
+        "men's clothing": "mens",
+        men: "mens",
+        womens: "womens",
+        "women's clothing": "womens",
+        women: "womens",
+        kids: "kids",
+        "kids' clothing": "kids",
+        kid: "kids",
+        baby: "baby",
+        "baby clothing": "baby",
+      };
+
+      const slug = CAT_LABEL_TO_SLUG[raw] || raw;
+
+      // ✅ If "all" is chosen → reset to full list
+      if (!slug || slug === "all") {
+        this.renderProducts(this.products);
+        return;
+      }
+
+      const filtered = this.products.filter((p) => {
+        const pid = Number(p.category_id || 0);
+        const pslug = (p.category || "").toString().trim().toLowerCase();
+        return CAT_ID_TO_SLUG[pid] === slug || pslug === slug;
+      });
+
+      this.renderProducts(filtered);
+    }
+
+    searchProducts(q) {
+      const query = (q || "").toLowerCase();
+      if (!query) {
+        this.renderProducts(this.products);
+        return;
+      }
+      const filtered = this.products.filter((p) =>
+        `${p.name} ${p.description || ""}`.toLowerCase().includes(query)
+      );
+      this.renderProducts(filtered);
+    }
+
+    sortProducts(opt) {
+      const list = [...this.products];
+      if (opt === "price-low") list.sort((a, b) => a.price - b.price);
+      else if (opt === "price-high") list.sort((a, b) => b.price - a.price);
+      this.renderProducts(list);
     }
   }
 
@@ -132,7 +162,7 @@
       ".product-container",
       window.cartManager
     );
-    renderer.loadProducts({ limit: 6, sortByNew: true });
+    renderer.loadProducts();
   }
 
   // ----- Orders view -----
@@ -226,56 +256,51 @@
     }
   }
 
-  // ----- router -----
+  // ---- Router ----
   async function loadPage(page) {
     if (page === "dashboard") {
       dashboardContent.innerHTML = `
-        <section id="dashboardWelcome">
+        <section>
           <h2>Welcome to the User Dashboard</h2>
           <p>Select an option from the Navbar.</p>
         </section>`;
     } else if (page === "homeContent") {
       renderHomeDashboard();
     } else if (page === "orders") {
-      renderOrdersView();
+      await renderOrdersView();
     } else if (page === "profile") {
-      const res = await fetch("/Online-store/pages/profile.html", {
-        credentials: "include",
-      });
+      const res = await fetch("/Online-store/pages/profile.html");
       const html = await res.text();
       dashboardContent.innerHTML = html;
 
       if (!window.initProfilePage) {
         const script = document.createElement("script");
-        script.src = "../js/profile.js?v=" + Date.now();
-        script.onload = () =>
-          window.initProfilePage && window.initProfilePage();
+        script.src = "/Online-store/js/profile.js?v=" + Date.now();
+        script.onload = () => window.initProfilePage?.();
         document.body.appendChild(script);
       } else {
         window.initProfilePage();
       }
     } else if (page === "product") {
-      // ✅ render products directly in dashboard (not public page)
+      // ✅ render inline dashboard product view
       dashboardContent.innerHTML = `
-        <section id="productSection">
-          <h2>Our Products</h2>
-          <div class="filters">
-            <input type="text" id="searchInput" placeholder="Search products...">
+        <section class="dashboard-products">
+          <h2>Products</h2>
+          <div style="margin:1rem 0;display:flex;gap:1rem;">
             <select id="category">
-              <option value="all">All Categories</option>
-              <option value="mens">Men</option>
-              <option value="womens">Women</option>
+              <option value="all">All</option>
+              <option value="mens">Mens</option>
+              <option value="womens">Womens</option>
               <option value="kids">Kids</option>
               <option value="baby">Baby</option>
             </select>
             <select id="sort">
-              <option value="new">Newest</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="rating">Rating</option>
+              <option value="default">Default</option>
+              <option value="price-low">Price: Low → High</option>
+              <option value="price-high">Price: High → Low</option>
             </select>
           </div>
-          <div class="product-container"></div>
+          <div class="product-container" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;"></div>
         </section>`;
 
       const renderer = new ProductRenderer(
@@ -283,47 +308,60 @@
         window.cartManager
       );
       await renderer.loadProducts();
+      activeRenderer = renderer; // ✅ make it globally accessible for header
 
-      const searchInput = dashboardContent.querySelector("#searchInput");
-      const categorySelect = dashboardContent.querySelector("#category");
-      const sortSelect = dashboardContent.querySelector("#sort");
-
-      searchInput &&
-        searchInput.addEventListener("input", (e) =>
-          renderer.searchProducts(e.target.value)
-        );
-      categorySelect &&
-        categorySelect.addEventListener("change", (e) =>
+      // local category + sort
+      dashboardContent
+        .querySelector("#category")
+        ?.addEventListener("change", (e) =>
           renderer.filterByCategory(e.target.value)
         );
-      sortSelect &&
-        sortSelect.addEventListener("change", (e) =>
+      dashboardContent
+        .querySelector("#sort")
+        ?.addEventListener("change", (e) =>
           renderer.sortProducts(e.target.value)
         );
-    } else {
-      dashboardContent.innerHTML = `<p style="color:red">⚠️ Page not recognized: ${esc(
-        page
-      )}</p>`;
     }
   }
 
-  // ----- nav -----
+  // ---- nav ----
   function initNavigation() {
     document.querySelectorAll(".nav-menu a[data-page]").forEach((link) => {
       link.addEventListener("click", (e) => {
         e.preventDefault();
-        const page = link.dataset.page;
-        loadPage(page);
+        loadPage(link.dataset.page);
       });
     });
   }
 
-  // ----- init -----
+  // ---- header search ----
+  function initHeaderControls() {
+    const headerSearch = document.querySelector("#searchInput");
+    const headerCategory = document.querySelector("header #category");
+
+    if (headerSearch) {
+      headerSearch.addEventListener("input", (e) => {
+        if (activeRenderer) {
+          activeRenderer.searchProducts(e.target.value);
+        }
+      });
+    }
+    if (headerCategory) {
+      headerCategory.addEventListener("change", (e) => {
+        if (activeRenderer) {
+          activeRenderer.filterByCategory(e.target.value);
+        }
+      });
+    }
+  }
+
+  // ---- init ----
   document.addEventListener("DOMContentLoaded", () => {
     window.cartManager = window.cartManager || {
-      addToCart: (p) => alert("Cart not initialized yet."),
+      addToCart: () => alert("Cart not ready"),
     };
     initNavigation();
+    initHeaderControls(); // ✅ connect header search & filter
     loadPage("dashboard");
   });
 })();
