@@ -1,5 +1,5 @@
 (() => {
-  const TAX_RATE = 0.1; // 10% tax
+  const TAX_RATE = 0.1; // 10%
 
   const money = (n) => `$${(Number(n) || 0).toFixed(2)}`;
 
@@ -35,30 +35,43 @@
       const user = await res.json();
       if (!user || !user.ok) return;
 
-      // Full Name
-      document.getElementById("name").value = [user.first_name, user.last_name]
-        .filter(Boolean)
-        .join(" ");
-
-      // Email
+      // Fill billing details
+      document.getElementById("name").value =
+        [user.first_name, user.last_name].filter(Boolean).join(" ") || "";
       document.getElementById("email").value = user.email || "";
-
-      // ✅ Phone (new autofill line)
-      if (document.getElementById("phone")) {
-        document.getElementById("phone").value = user.phone || "";
-      }
-
-      // Address
+      document.getElementById("phone").value = user.phone || "";
       document.getElementById("address").value = user.address || "";
-      if (user.city) document.getElementById("city").value = user.city;
-      if (user.postcode)
-        document.getElementById("postcode").value = user.postcode;
-      if (user.country) document.getElementById("country").value = user.country;
+      document.getElementById("city").value = user.city || "";
+      document.getElementById("postcode").value = user.postcode || "";
 
-      // 🔑 store user_id in localStorage for checkout
-      if (user.user_id) {
-        localStorage.setItem("user_id", user.user_id);
+      // Payment autofill
+      const cardInput = document.getElementById("cardNumber");
+      const expiryInput = document.getElementById("expiry");
+      const cvvInput = document.getElementById("cvv");
+
+      if (user.card_number && cardInput) {
+        const last4 = user.card_number.slice(-4);
+        cardInput.value = "**** **** **** " + last4;
+        cardInput.addEventListener("focus", () => {
+          if (cardInput.value.startsWith("****")) {
+            cardInput.value = "";
+          }
+        });
       }
+      if (expiryInput) expiryInput.value = user.card_expiry || "";
+      if (cvvInput) cvvInput.value = ""; // leave blank for safety
+
+      // auto-format card input as 4-4-4-4
+      if (cardInput) {
+        cardInput.addEventListener("input", () => {
+          let v = cardInput.value.replace(/\D/g, "");
+          v = v.replace(/(.{4})/g, "$1 ").trim();
+          cardInput.value = v;
+        });
+      }
+
+      // Store user_id
+      if (user.user_id) localStorage.setItem("user_id", user.user_id);
     } catch (err) {
       console.warn("Autofill failed", err);
     }
@@ -128,7 +141,6 @@
         money(tax)
       );
     }
-
     totalEl.textContent = money(total);
   }
 
@@ -148,10 +160,8 @@
       return;
     }
 
-    // collect inputs
     const name = document.getElementById("name").value.trim();
     const email = document.getElementById("email").value.trim();
-    // const phone = document.getElementById("phone").value.trim();
     const address = document.getElementById("address").value.trim();
     const city = document.getElementById("city").value.trim();
     const postcode = document.getElementById("postcode").value.trim();
@@ -164,15 +174,13 @@
       "$0.00";
     const totalText = document.getElementById("totalAmount").textContent;
 
-    // 🔑 detect user_id
     const userId = localStorage.getItem("user_id");
 
     const orderData = {
       user_id: userId ? Number(userId) : null,
-      guest_name: name, // always include
-      guest_email: email, // always include
-      // guest_phone: phone, // always include
-      guest_address: `${address}, ${city} ${postcode}`, // always include
+      guest_name: name,
+      guest_email: email,
+      guest_address: `${address}, ${city} ${postcode}`,
       subtotal: subtotalText.replace("$", ""),
       tax: taxText.replace("$", ""),
       total: totalText.replace("$", ""),
@@ -195,13 +203,16 @@
         if (data.success) {
           localStorage.removeItem("cart");
           form.style.display = "none";
-          document.getElementById(
-            "confirmationMessage"
-          ).innerHTML = `✅ Thank you, <strong>${
-            name || "User"
-          }</strong>! Your order of <strong>${totalText}</strong> has been placed successfully.`;
-          document.getElementById("confirmationMessage").style.display =
-            "block";
+
+          // ✅ hide the heading
+          const mainHeading = document.querySelector(".checkout-container h1");
+          if (mainHeading) mainHeading.style.display = "none";
+
+          const cm = document.getElementById("confirmationMessage");
+          cm.innerHTML = `✅ Thank you, <strong>${name || "User"}</strong>! 
+    Your order of <strong>${totalText}</strong> has been placed successfully.`;
+          cm.style.display = "block";
+
           renderOrderSummary();
         } else {
           alert("Order failed: " + data.message);

@@ -21,7 +21,7 @@
     </header>
     <main class="checkout-container">
       <h1>Please fill your details here</h1>
-      <div id="confirmationMessage">
+      <div id="confirmationMessage" style="display: none">
         Thank you for your order! Your order has been received and is being
         processed.
       </div>
@@ -114,6 +114,8 @@
               id="cardNumber"
               name="cardNumber"
               placeholder="1234 5678 9012 3456"
+              inputmode="numeric"
+              maxlength="19"
               required
             />
           </div>
@@ -131,10 +133,11 @@
             <div>
               <label for="cvv">CVV</label>
               <input
-                type="text"
+                type="password"
                 id="cvv"
                 name="cvv"
                 placeholder="123"
+                maxlength="4"
                 required
               />
             </div>
