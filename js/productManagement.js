@@ -1,159 +1,364 @@
-// productManagement.js
-function initProductManagement() {
-  const productForm = document.getElementById("productForm");
-  const productsTableBody = document.getElementById("productsTableBody");
-  const productImageInput = document.getElementById("productImage");
-  const previewImg = document.getElementById("previewImg");
-  const notification = document.getElementById("notification");
-  const searchInput = document.getElementById("searchInput");
+// /Online-store/js/productManagement.js
+(function () {
+  // ---- Config ----
+  const API_PRODUCTS = "/Online-store/php/products.php";
+  const API_UPLOAD = "/Online-store/php/upload_product_image.php";
 
-  if (!productsTableBody || !productForm) return; // exit if loaded incorrectly
+  // Category mapping (adjust to your DB if needed)
+  const CAT_NAME_TO_ID = { Mens: 1, Womens: 2, Kids: 3, Baby: 4 };
+  const CAT_ID_TO_NAME = { 1: "mens", 2: "womens", 3: "kids", 4: "baby" };
 
-  let products = [];
-  let uploadedImageData = "";
-  let currentEditIndex = null;
-
-  // Load products
-  async function loadProducts() {
+  // ---- Utils ----
+  const esc = (s) =>
+    String(s ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  const money = (n) => (Number.isFinite(+n) ? `$${(+n).toFixed(2)}` : "$0.00");
+  const j = (v) => {
     try {
-      const res = await fetch("../data/products.json");
-      const data = await res.json();
-      products = data.products || [];
-      renderProducts(products);
-    } catch (err) {
-      console.error("Error loading products:", err);
-      productsTableBody.innerHTML =
-        "<tr><td colspan='6' style='color:red;'>Failed to load products.</td></tr>";
-    }
+      if (Array.isArray(v)) return v;
+      if (typeof v === "string" && v.trim() !== "") return JSON.parse(v);
+    } catch {}
+    return [];
+  };
+
+  // ---- API helpers ----
+  async function apiJson(res) {
+    const ct = res.headers.get("content-type") || "";
+    if (ct.includes("application/json")) return res.json();
+    const text = await res.text();
+    throw new Error(text || `HTTP ${res.status}`);
   }
 
-  function renderProducts(list = products) {
-    if (!list || list.length === 0) {
-      productsTableBody.innerHTML =
-        "<tr><td colspan='6'>No products available.</td></tr>";
+  async function apiRead() {
+    const res = await fetch(`${API_PRODUCTS}?action=read`, {
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error(`Read failed: HTTP ${res.status}`);
+    const data = await apiJson(res);
+    if (!Array.isArray(data)) throw new Error("Unexpected response");
+    return data.map((row) => ({
+      id: +row.id,
+      name: row.name || "",
+      category_id: +row.category_id || 0,
+      category: CAT_ID_TO_NAME[row.category_id] || "",
+      price: +row.price || 0,
+      description: row.description || "",
+      image: row.image || "",
+      isNew: +row.isNew || 0,
+      rating: +row.rating || 0,
+      reviews: +row.reviews || 0,
+      colors: j(row.colors),
+      sizes: j(row.sizes),
+      inStock: +row.inStock ? 1 : 0,
+    }));
+  }
+
+  async function apiCreate(payload) {
+    const res = await fetch(`${API_PRODUCTS}?action=create`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(payload),
+    });
+    const data = await apiJson(res);
+    if (!res.ok || !data?.success)
+      throw new Error(data?.error || "Create failed");
+    return data.id;
+  }
+
+  async function apiUpdate(payload) {
+    const res = await fetch(`${API_PRODUCTS}?action=update`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(payload),
+    });
+    const data = await apiJson(res);
+    if (!res.ok || !data?.success)
+      throw new Error(data?.error || "Update failed");
+    return true;
+  }
+
+  async function apiDelete(id) {
+    const res = await fetch(
+      `${API_PRODUCTS}?action=delete&id=${encodeURIComponent(id)}`,
+      { method: "GET", credentials: "include" }
+    );
+    const data = await apiJson(res);
+    if (!res.ok || !data?.success)
+      throw new Error(data?.error || "Delete failed");
+    return true;
+  }
+
+  // ---- Main init ----
+  window.initProductManagement = function initProductManagement() {
+    console.log("[PM] backend mode →", API_PRODUCTS);
+
+    // DOM
+    const productForm = document.getElementById("productForm");
+    const productsTableBody = document.getElementById("productsTableBody");
+    const productImageInput = document.getElementById("productImage");
+    const previewImg = document.getElementById("previewImg");
+    const notification = document.getElementById("notification");
+    const searchInput = document.getElementById("searchInput");
+    const saveBtn = document.getElementById("saveBtn");
+    const cancelEditBtn = document.getElementById("cancelEditBtn");
+    const formTitle = document.getElementById("formTitle");
+
+    if (!productForm || !productsTableBody) {
+      console.warn("[PM] form/table not found on this page");
       return;
     }
 
-    productsTableBody.innerHTML = list
-      .map(
-        (p, idx) => `
-      <tr>
-        <td><img src="${p.image || "../assets/images/placeholder.jpg"}" alt="${
-          p.name
-        }" style="width:60px;height:60px;object-fit:cover;"></td>
-        <td>${p.name}</td>
-        <td>$${p.price.toFixed(2)}</td>
-        <td>${p.category}</td>
-        <td>${p.inStock ? "In Stock" : "Out of Stock"}</td>
-        <td>${p.description || ""}</td>
-        <td>
-          <button onclick="editProduct(${idx})" class="edit-btn">Edit</button>
-          <button onclick="deleteProduct(${idx})" class="delete-btn">Delete</button>
-        </td>
-      </tr>
-    `
-      )
-      .join("");
-  }
+    // State
+    let products = [];
+    let currentEditId = null;
+    let uploadedImageURL = "";
 
-  // Image preview
-  if (productImageInput) {
-    productImageInput.addEventListener("change", () => {
-      const file = productImageInput.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          uploadedImageData = e.target.result;
-          previewImg.src = uploadedImageData;
-          previewImg.style.display = "block";
-        };
-        reader.readAsDataURL(file);
-      } else {
-        uploadedImageData = "";
+    // UI helpers
+    const notify = (msg, ms = 2200) => {
+      if (!notification) return;
+      notification.textContent = msg;
+      notification.style.display = "block";
+      window.clearTimeout(notify._t);
+      notify._t = window.setTimeout(
+        () => (notification.style.display = "none"),
+        ms
+      );
+    };
+
+    // Render
+    // ---- Render ----
+    function render(list = products) {
+      if (!list.length) {
+        productsTableBody.innerHTML =
+          "<tr><td colspan='7'>No products available.</td></tr>";
+        return;
+      }
+      productsTableBody.innerHTML = list
+        .map(
+          (p) => `
+        <tr>
+          <td>
+            ${
+              p.image
+                ? `<img src="${p.image}" 
+                        alt="${esc(p.name)}"
+                        style="width:60px;height:60px;object-fit:cover;border-radius:6px">`
+                : "—"
+            }
+          </td>
+          <td>${esc(p.name)}</td>
+          <td>${money(p.price)}</td>
+          <td>${p.category || "-"}</td>
+          <td>${p.inStock ? "In Stock" : "Out of Stock"}</td>
+          <td>${p.description ? esc(p.description) : ""}</td>
+          <td>
+            <button class="edit-btn" data-id="${p.id}">Edit</button>
+            <button class="delete-btn" data-id="${p.id}">Delete</button>
+          </td>
+        </tr>`
+        )
+        .join("");
+    }
+
+    async function load() {
+      try {
+        products = await apiRead();
+        render(products);
+      } catch (e) {
+        console.error(e);
+        notify(e.message || "Failed to load products");
+        productsTableBody.innerHTML =
+          "<tr><td colspan='7' style='color:red'>Load failed</td></tr>";
+      }
+    }
+
+    // Image upload + preview (robust)
+    productImageInput?.addEventListener("change", async () => {
+      const file = productImageInput.files?.[0];
+      if (!file) {
+        uploadedImageURL = "";
+        previewImg.src = "";
+        previewImg.style.display = "none";
+        return;
+      }
+
+      // Local preview
+      previewImg.src = URL.createObjectURL(file);
+      previewImg.style.display = "block";
+
+      const fd = new FormData();
+      fd.append("file", file);
+
+      try {
+        const res = await fetch(API_UPLOAD, {
+          method: "POST",
+          body: fd,
+          credentials: "include",
+        });
+        const ct = res.headers.get("content-type") || "";
+        const raw = ct.includes("application/json")
+          ? await res.json()
+          : { ok: false, error: await res.text() };
+
+        console.log("[PM] upload →", res.status, raw);
+        if (!res.ok || !raw?.ok)
+          throw new Error(raw?.error || `Upload failed (HTTP ${res.status})`);
+
+        uploadedImageURL = raw.url; // Use this URL when saving the product
+        notify("Image uploaded");
+      } catch (e) {
+        alert(e.message || "Image upload failed");
+        uploadedImageURL = "";
         previewImg.src = "";
         previewImg.style.display = "none";
       }
     });
-  }
 
-  // Form submit
-  productForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const newProduct = {
-      name: document.getElementById("productName").value.trim(),
-      price: parseFloat(document.getElementById("productPrice").value),
-      category: document.getElementById("productCategory").value.trim(),
-      stock: parseInt(document.getElementById("productStock").value, 10),
-      description: document.getElementById("productDescription").value.trim(),
-      image: uploadedImageData || "",
-      inStock: true,
-    };
+    // Create/Update submit
+    productForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-    if (currentEditIndex !== null) {
-      products[currentEditIndex] = newProduct;
-      currentEditIndex = null;
-      productForm.querySelector("#saveBtn").textContent = "Add Product";
-      showNotification("Product updated!");
-    } else {
-      products.push(newProduct);
-      showNotification("Product added! (Frontend only)");
-    }
+      const name = document.getElementById("productName").value.trim();
+      const price = parseFloat(document.getElementById("productPrice").value);
+      const categoryName = document
+        .getElementById("productCategory")
+        .value.trim();
+      const stock = parseInt(document.getElementById("productStock").value, 10);
+      const description = document
+        .getElementById("productDescription")
+        .value.trim();
 
-    productForm.reset();
-    previewImg.src = "";
-    previewImg.style.display = "none";
-    uploadedImageData = "";
-    renderProducts();
-  });
+      const category_id = CAT_NAME_TO_ID[categoryName] || null;
 
-  // Search
-  if (searchInput) {
-    searchInput.addEventListener("input", () => {
-      const query = searchInput.value.toLowerCase();
-      const filtered = products.filter(
-        (p) =>
-          p.name.toLowerCase().includes(query) ||
-          p.category.toLowerCase().includes(query)
-      );
-      renderProducts(filtered);
+      if (!name || !Number.isFinite(price) || !category_id) {
+        notify("Please fill Name, Price and Category correctly.");
+        return;
+      }
+
+      const payload = {
+        name,
+        category_id,
+        price,
+        description,
+        image: uploadedImageURL || "",
+        isNew: 0,
+        rating: 0,
+        reviews: 0,
+        colors: [],
+        sizes: [],
+        inStock: stock > 0 ? 1 : 0,
+      };
+
+      try {
+        saveBtn.disabled = true;
+
+        if (currentEditId != null) {
+          await apiUpdate({ id: currentEditId, ...payload });
+          notify("Product updated!");
+        } else {
+          await apiCreate(payload);
+          notify("Product added!");
+        }
+
+        // Reset form
+        productForm.reset();
+        currentEditId = null;
+        uploadedImageURL = "";
+        previewImg.src = "";
+        previewImg.style.display = "none";
+        formTitle.textContent = "Add Product";
+        saveBtn.textContent = "Add Product";
+        cancelEditBtn.style.display = "none";
+
+        await load();
+      } catch (e) {
+        console.error(e);
+        notify(e.message || "Save failed");
+      } finally {
+        saveBtn.disabled = false;
+      }
     });
-  }
 
-  // Global edit/delete
-  window.editProduct = function (idx) {
-    const p = products[idx];
-    document.getElementById("productName").value = p.name;
-    document.getElementById("productPrice").value = p.price;
-    document.getElementById("productCategory").value = p.category;
-    document.getElementById("productStock").value = p.stock;
-    document.getElementById("productDescription").value = p.description;
-    uploadedImageData = p.image || "";
-    previewImg.src = uploadedImageData;
-    previewImg.style.display = uploadedImageData ? "block" : "none";
-    currentEditIndex = idx;
-    productForm.querySelector("#saveBtn").textContent = "Update Product";
+    // Cancel edit
+    cancelEditBtn?.addEventListener("click", () => {
+      currentEditId = null;
+      productForm.reset();
+      uploadedImageURL = "";
+      previewImg.src = "";
+      previewImg.style.display = "none";
+      formTitle.textContent = "Add Product";
+      saveBtn.textContent = "Add Product";
+      cancelEditBtn.style.display = "none";
+    });
+
+    // Row actions (edit/delete)
+    productsTableBody.addEventListener("click", async (e) => {
+      const edit = e.target.closest(".edit-btn");
+      const del = e.target.closest(".delete-btn");
+
+      if (edit) {
+        const id = +edit.dataset.id;
+        const p = products.find((x) => x.id === id);
+        if (!p) return;
+
+        document.getElementById("productName").value = p.name;
+        document.getElementById("productPrice").value = p.price;
+        document.getElementById("productCategory").value =
+          Object.keys(CAT_NAME_TO_ID).find(
+            (k) => CAT_NAME_TO_ID[k] === p.category_id
+          ) || "";
+        document.getElementById("productStock").value = p.inStock ? 1 : 0;
+        document.getElementById("productDescription").value =
+          p.description || "";
+
+        uploadedImageURL = p.image || "";
+        previewImg.src = uploadedImageURL || "";
+        previewImg.style.display = uploadedImageURL ? "block" : "none";
+
+        currentEditId = p.id;
+        formTitle.textContent = "Edit Product";
+        saveBtn.textContent = "Update Product";
+        cancelEditBtn.style.display = "inline-block";
+      }
+
+      if (del) {
+        const id = +del.dataset.id;
+        if (!confirm("Delete this product?")) return;
+        try {
+          await apiDelete(id);
+          notify("Product deleted!");
+          await load();
+        } catch (err) {
+          console.error(err);
+          notify(err.message || "Delete failed");
+        }
+      }
+    });
+
+    // Search
+    searchInput?.addEventListener("input", () => {
+      const q = searchInput.value.toLowerCase();
+      render(
+        products.filter(
+          (p) =>
+            p.name.toLowerCase().includes(q) ||
+            (p.category || "").toLowerCase().includes(q)
+        )
+      );
+    });
+
+    // Initial load
+    load();
   };
 
-  window.deleteProduct = function (idx) {
-    if (confirm("Delete this product?")) {
-      products.splice(idx, 1);
-      renderProducts();
-      showNotification("Product deleted!");
-    }
-  };
-
-  function showNotification(msg) {
-    if (!notification) return;
-    notification.textContent = msg;
-    notification.style.display = "block";
-    setTimeout(() => (notification.style.display = "none"), 2000);
+  // Auto-init if used as a standalone page
+  if (document.getElementById("productManagementC")) {
+    window.initProductManagement();
   }
-
-  // Initial load
-  loadProducts();
-}
-
-// Auto-init if standalone page
-if (document.getElementById("productManagementC")) {
-  initProductManagement();
-}
+})();

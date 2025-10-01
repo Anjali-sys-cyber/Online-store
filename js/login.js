@@ -10,7 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Toggle password visibility
   if (togglePassword) {
     togglePassword.addEventListener("click", () => {
-      const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+      const type =
+        passwordInput.getAttribute("type") === "password" ? "text" : "password";
       passwordInput.setAttribute("type", type);
       togglePassword.classList.toggle("fa-eye");
       togglePassword.classList.toggle("fa-eye-slash");
@@ -50,19 +51,29 @@ document.addEventListener("DOMContentLoaded", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ email, password, remember })
+        body: JSON.stringify({ email, password, remember }),
       });
 
       const text = await res.text();
       let data = {};
-      try { data = JSON.parse(text); } catch {}
-      console.log("login.php →", res.status, text);
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error("Invalid server response");
+      }
+
+      console.log("login.php →", res.status, data);
 
       if (!res.ok || !data.ok) throw new Error(data.error || "Login failed");
 
+      // Save user details so we can use them later
+      localStorage.setItem("user", JSON.stringify(data));
+      if (remember) {
+        sessionStorage.setItem("user", JSON.stringify(data));
+      }
+
       show("Login successful! Redirecting...", "success");
 
-      // honor ?next=... if present
       setTimeout(() => {
         const params = new URLSearchParams(location.search);
         const next = params.get("next");

@@ -1,95 +1,236 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>User Profile</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="/Online-store/css/common.css" />
-  <link rel="stylesheet" href="/Online-store/css/profile.css" />
-  <style>
-    /* small fallback styles in case profile.css isn't loaded */
-    .profile-container{max-width:980px;margin:6rem auto 2rem;padding:1.25rem;background:#fff;border-radius:14px;box-shadow:0 10px 35px rgba(0,0,0,.08)}
-    .profile-container h2{text-align:center;margin:0 0 1rem 0}
-    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:.75rem 0}
-    .form-col{display:flex;flex-direction:column;gap:.4rem}
-    label{font-weight:600}
-    input[type="text"],input[type="email"],input[type="file"]{padding:.7rem .8rem;border:1px solid #d6d6d6;border-radius:8px}
-    .btn{padding:.6rem .9rem;border:0;background:#1a2797;color:#fff;border-radius:8px;cursor:pointer}
-    .btn:disabled{opacity:.6;cursor:not-allowed}
-    .pf-row button{justify-self:start}
-    .pf-msg{align-self:center;font-size:.9rem}
-    @media (max-width: 720px){.form-row{grid-template-columns:1fr}}
-  </style>
-</head>
-<body>
-  <!-- Only the <main> is used when this page is loaded inside user.html -->
-  <main id="profilePage">
-    <section class="profile-container">
-      <h2>My Profile</h2>
+  <head>
+    <meta charset="UTF-8" />
+    <title>My Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/Online-store/css/common.css" />
+    <link rel="stylesheet" href="/Online-store/css/profile.css" />
+    <!-- FontAwesome for payment icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .profile-container {
+        max-width: 980px;
+        margin: 6rem auto 2rem;
+        padding: 1.25rem;
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+      }
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin: 0.75rem 0;
+      }
+      .form-col {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+      .btn {
+        padding: 0.7rem 1rem;
+        border: 0;
+        background: #1a2797;
+        color: #fff;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .pf-msg {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+      }
+      .ro-field {
+        padding: 0.5rem;
+        background: #f5f5f5;
+        border-radius: 6px;
+      }
 
-      <!-- Name & Email -->
-      <div class="form-row pf-row">
-        <div class="form-col">
-          <label for="fullName">Full Name</label>
-          <input type="text" id="fullName" />
-        </div>
-        <div class="form-col">
-          <label for="email">Email</label>
-          <input type="email" id="email" />
-        </div>
-      </div>
+      /* Payment method styles */
+      .payment-methods {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        margin: 0.5rem 0;
+        flex-wrap: wrap;
+      }
+      .pm-option {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        padding: 0.5rem 1rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        transition: all 0.3s;
+      }
+      .pm-option input {
+        display: none;
+      }
+      .pm-option i {
+        font-size: 2rem;
+        color: #666;
+        transition: color 0.3s;
+      }
+      .pm-option input:checked + i {
+        color: #1a2797;
+      }
+      #pm-placeholder {
+        color: #888;
+        font-style: italic;
+      }
 
-      <div class="form-row pf-row">
-        <div class="form-col">
-          <button id="pf-save-name" class="btn">Update Name</button>
-          <small class="pf-msg" id="pf-msg-name"></small>
-        </div>
-        <div class="form-col">
-          <button id="pf-save-email" class="btn">Update Email</button>
-          <small class="pf-msg" id="pf-msg-email"></small>
-        </div>
-      </div>
+      @media (max-width: 720px) {
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="profile-container">
+      <h2 style="text-align: center; margin-bottom: 1rem">My Profile</h2>
 
-      <!-- Username & Phone -->
-      <div class="form-row pf-row">
-        <div class="form-col">
-          <label for="username">Username</label>
-          <input type="text" id="username" />
+      <!-- VIEW MODE -->
+      <section id="profile-view">
+        <div class="form-row">
+          <div class="form-col">
+            <label>Full Name</label>
+            <div id="po-name" class="ro-field">—</div>
+          </div>
+          <div class="form-col">
+            <label>Email</label>
+            <div id="po-email" class="ro-field">—</div>
+          </div>
         </div>
-        <div class="form-col">
-          <label for="phone">Phone Number</label>
-          <input type="text" id="phone" />
+        <div class="form-row">
+          <div class="form-col">
+            <label>Username</label>
+            <div id="po-username" class="ro-field">—</div>
+          </div>
+          <div class="form-col">
+            <label>Phone</label>
+            <div id="po-phone" class="ro-field">—</div>
+          </div>
         </div>
-      </div>
+        <h3>Address</h3>
+        <div class="form-row">
+          <div class="form-col">
+            <label>Street</label>
+            <div id="po-address" class="ro-field">—</div>
+          </div>
+          <div class="form-col">
+            <label>City</label>
+            <div id="po-city" class="ro-field">—</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-col">
+            <label>Postcode</label>
+            <div id="po-postcode" class="ro-field">—</div>
+          </div>
+        </div>
+        <div class="profile-item">
+          <label>Payment Method</label>
+          <div id="po-method" class="payment-methods">
+            <span id="pm-placeholder">Select a payment method</span>
+          </div>
+        </div>
 
-      <div class="form-row pf-row">
-        <div class="form-col">
-          <button id="pf-save-username" class="btn">Update Username</button>
-          <small class="pf-msg" id="pf-msg-username"></small>
+        <div style="margin-top: 1rem; text-align: right">
+          <button id="btn-edit" class="btn">Edit Profile</button>
         </div>
-        <div class="form-col">
-          <button id="pf-save-phone" class="btn">Update Phone</button>
-          <small class="pf-msg" id="pf-msg-phone"></small>
-        </div>
-      </div>
+      </section>
 
-      <!-- Avatar -->
-      <div class="form-row pf-row">
-        <div class="form-col">
-          <label for="profilePic">Profile Picture</label>
-          <input id="profilePic" type="file" accept="image/*" />
-          <img id="previewProfilePic"
-               style="display:none;width:120px;height:120px;border-radius:50%;object-fit:cover;margin-top:10px;" />
+      <!-- EDIT MODE -->
+      <section id="profile-edit" style="display: none">
+        <div class="form-row">
+          <div class="form-col">
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" />
+          </div>
+          <div class="form-col">
+            <label for="email">Email</label>
+            <input type="email" id="email" />
+          </div>
         </div>
-        <div class="form-col" style="align-self:end">
-          <button id="pf-save-avatar" class="btn">Upload Picture</button>
-          <small class="pf-msg" id="pf-msg-avatar"></small>
+        <div class="form-row">
+          <div class="form-col">
+            <label for="username">Username</label>
+            <input type="text" id="username" />
+          </div>
+          <div class="form-col">
+            <label for="phone">Phone</label>
+            <input type="text" id="phone" />
+          </div>
         </div>
-      </div>
-    </section>
-  </main>
+        <h3>Address</h3>
+        <div class="form-row">
+          <div class="form-col">
+            <label for="address">Street</label>
+            <input type="text" id="address" />
+          </div>
+          <div class="form-col">
+            <label for="city">City</label>
+            <input type="text" id="city" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-col">
+            <label for="postcode">Postcode</label>
+            <input type="text" id="postcode" />
+          </div>
+        </div>
 
-  <!-- If opened directly (not via dashboard), still works -->
-  <script src="/Online-store/js/profile.js" defer></script>
-</body>
+        <!-- Payment -->
+        <h3>Payment</h3>
+        <div class="payment-methods">
+          <label class="pm-option">
+            <input type="radio" name="paymentMethod" value="mastercard" />
+            <i class="fab fa-cc-mastercard"></i> Mastercard
+          </label>
+          <label class="pm-option">
+            <input type="radio" name="paymentMethod" value="visa" />
+            <i class="fab fa-cc-visa"></i> Visa
+          </label>
+          <label class="pm-option">
+            <input type="radio" name="paymentMethod" value="paypal" />
+            <i class="fab fa-cc-paypal"></i> PayPal
+          </label>
+        </div>
+
+        <div class="form-row">
+          <div class="form-col">
+            <label for="cardNumber">Card Number</label>
+            <input type="text" id="cardNumber" maxlength="19" />
+          </div>
+          <div class="form-col">
+            <label for="expiry">Expiry (MM/YYYY)</label>
+            <input type="text" id="expiry" />
+          </div>
+          <div class="form-col">
+            <label for="cvv">CVV</label>
+            <input type="text" id="cvv" maxlength="4" />
+          </div>
+        </div>
+
+        <div style="margin-top: 1rem; text-align: right">
+          <button id="btn-cancel" class="btn" style="background: #888">
+            Cancel
+          </button>
+          <button id="btn-save" class="btn">Save</button>
+        </div>
+        <small id="pf-msg-all" class="pf-msg"></small>
+      </section>
+    </main>
+
+    <script src="../js/profile.js" defer></script>
+  </body>
 </html>

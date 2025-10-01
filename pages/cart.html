@@ -17,10 +17,12 @@
   <body>
     <header>
       <h1>Your Shopping Cart</h1>
-      <a href="product.html"
-        ><i class="fas fa-arrow-left"></i> Continue Shopping</a
-      >
+      <!-- Continue Shopping link handled in JS -->
+      <a href="#" id="continueShopping">
+        <i class="fas fa-arrow-left"></i> Continue Shopping
+      </a>
     </header>
+
     <main>
       <div class="cart-container">
         <div id="cart-items"></div>
@@ -39,16 +41,68 @@
             <span>Total:</span>
             <span id="total">$0.00</span>
           </div>
-          <button type="submit" id="checkout-btn">Proceed to Checkout</button>
+          <button type="button" id="checkout-btn">Proceed to Checkout</button>
         </div>
       </div>
 
       <div id="empty-cart" class="empty-cart hidden">
         <i class="fas fa-shopping-cart"></i>
         <p>Your cart is empty</p>
-        <a href="product.html">Start Shopping</a>
+        <!-- Start Shopping link handled in JS -->
+        <a href="#" id="startShopping">Start Shopping</a>
       </div>
     </main>
+
     <script src="../js/cart.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        let user = null;
+        try {
+          user = JSON.parse(localStorage.getItem("user")) || null;
+        } catch {
+          user = null;
+        }
+
+        // ✅ Check if user is logged in
+        function isLoggedIn(u) {
+          return !!(u && (u.user_id || u.id));
+        }
+
+        // ✅ Redirect helper
+        function goToProducts() {
+          if (isLoggedIn(user)) {
+            // logged-in user → dashboard product page
+            window.location.href = "user.html?page=product";
+          } else {
+            // guest → public product page
+            window.location.href = "product.html";
+          }
+        }
+
+        // ✅ Continue shopping
+        document
+          .getElementById("continueShopping")
+          ?.addEventListener("click", (e) => {
+            e.preventDefault();
+            goToProducts();
+          });
+
+        // ✅ Start shopping
+        document
+          .getElementById("startShopping")
+          ?.addEventListener("click", (e) => {
+            e.preventDefault();
+            goToProducts();
+          });
+
+        // ✅ Proceed to checkout
+        document
+          .getElementById("checkout-btn")
+          ?.addEventListener("click", (e) => {
+            e.preventDefault();
+            window.location.href = "checkout.html";
+          });
+      });
+    </script>
   </body>
 </html>

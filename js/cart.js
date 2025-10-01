@@ -124,7 +124,23 @@ class CartPage {
       alert("Your cart is empty!");
       return;
     }
-    window.location.href = "checkout.html";
+
+    let user = null;
+    try {
+      user = JSON.parse(localStorage.getItem("user")) || null;
+    } catch {
+      user = null;
+    }
+
+    console.log("[Cart] checkout user:", user); // 🔎 debug log
+
+    if (user && (user.id || user.user_id)) {
+      // ✅ Logged-in user → go to dashboard checkout
+      window.location.href = "/Online-store/pages/dashboard.html?page=checkout";
+    } else {
+      // ✅ Guest → go to public checkout
+      window.location.href = "checkout.html";
+    }
   }
 }
 

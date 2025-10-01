@@ -1,36 +1,54 @@
 <?php
-// /Online-store/php/getOrders.php
+declare(strict_types=1);
 header('Content-Type: application/json');
 session_start();
-
-if (empty($_SESSION['user_id'])) {
-  echo json_encode([
-    'ok' => false,
-    'reason' => 'no-session',
-    'session_dump' => $_SESSION, // 👀 debug: see session values
-  ]);
-  exit;
-}
 
 $config = require __DIR__ . '/config.php';
 
 try {
-  $pdo = new PDO($config['dsn'], $config['user'], $config['pass'], $config['pdo_options']);
+    $pdo = new PDO($config['dsn'], $config['user'], $config['pass'], $config['pdo_options']);
 } catch (Throwable $e) {
-  echo json_encode(['ok' => false, 'reason' => 'db-fail', 'error' => $e->getMessage()]);
-  exit;
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'error' => 'DB connection failed']);
+    exit;
 }
 
-$userId = (int)$_SESSION['user_id'];
+// 🔑 get user_id from session or fallback to request body
+$userId = $_SESSION['user_id'] ?? null;
 
-$stmt = $pdo->prepare("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC");
-$stmt->execute([$userId]);
-$orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-foreach ($orders as &$order) {
-  $stmtItems = $pdo->prepare("SELECT * FROM order_items WHERE order_id = ?");
-  $stmtItems->execute([$order['order_id']]);
-  $order['items'] = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
+if (!$userId) {
+    $raw = file_get_contents('php://input');
+    $input = json_decode($raw, true);
+    if (is_array($input) && !empty($input['user_id'])) {
+        $userId = (int)$input['user_id'];
+    }
 }
 
-echo json_encode(['ok' => true, 'user_id' => $userId, 'orders' => $orders]);
+if (!$userId) {
+    http_response_code(403);
+    echo json_encode(['ok' => false, 'error' => 'Not logged in']);
+    exit;
+}
+
+try {
+    // ✅ fetch all orders for user
+    $stmt = $pdo->prepare("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC");
+    $stmt->execute([$userId]);
+    $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($orders as &$order) {
+        $orderId = $order['order_id'];
+
+        // ✅ fetch items for each order
+        $itemStmt = $pdo->prepare("SELECT order_item_id, product_id, product_name, quantity, price, line_total 
+                                   FROM order_items 
+                                   WHERE order_id = ?");
+        $itemStmt->execute([$orderId]);
+        $order['items'] = $itemStmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    echo json_encode(['ok' => true, 'orders' => $orders]);
+} catch (Throwable $e) {
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
+}

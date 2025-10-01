@@ -1,20 +1,16 @@
 (() => {
   const TAX_RATE = 0.1; // 10% tax
 
-  // ====== helpers ======
   const money = (n) => `$${(Number(n) || 0).toFixed(2)}`;
 
   function getCart() {
     try {
-      const raw = localStorage.getItem("cart");
-      const arr = JSON.parse(raw) || [];
-      return Array.isArray(arr) ? arr : [];
+      return JSON.parse(localStorage.getItem("cart")) || [];
     } catch {
       return [];
     }
   }
 
-  // create or update a summary row (label + value)
   function upsertSummaryRow(containerDiv, id, labelText, valueText) {
     let row = document.getElementById(id);
     if (!row) {
@@ -30,7 +26,44 @@
     }
   }
 
-  // render order summary
+  // ====== auto-fill checkout form for logged-in users ======
+  async function autofillUserDetails() {
+    try {
+      const res = await fetch("../php/me.php", { credentials: "include" });
+      if (!res.ok) return;
+
+      const user = await res.json();
+      if (!user || !user.ok) return;
+
+      // Full Name
+      document.getElementById("name").value = [user.first_name, user.last_name]
+        .filter(Boolean)
+        .join(" ");
+
+      // Email
+      document.getElementById("email").value = user.email || "";
+
+      // ✅ Phone (new autofill line)
+      if (document.getElementById("phone")) {
+        document.getElementById("phone").value = user.phone || "";
+      }
+
+      // Address
+      document.getElementById("address").value = user.address || "";
+      if (user.city) document.getElementById("city").value = user.city;
+      if (user.postcode)
+        document.getElementById("postcode").value = user.postcode;
+      if (user.country) document.getElementById("country").value = user.country;
+
+      // 🔑 store user_id in localStorage for checkout
+      if (user.user_id) {
+        localStorage.setItem("user_id", user.user_id);
+      }
+    } catch (err) {
+      console.warn("Autofill failed", err);
+    }
+  }
+
   function renderOrderSummary() {
     const list = document.getElementById("orderSummaryList");
     const totalEl = document.getElementById("totalAmount");
@@ -57,7 +90,7 @@
         upsertSummaryRow(
           orderSummarySection,
           "taxRow",
-          `Tax (${(TAX_RATE * 100).toFixed(0)}%)`,
+          `Tax (${TAX_RATE * 100}%)`,
           money(0)
         );
       }
@@ -65,14 +98,11 @@
       return;
     }
 
-    // build line items and subtotal
     let subtotal = 0;
     cart.forEach((item) => {
       const qty = Number(item.quantity) || 1;
-      const price = Number(item.price) || 0;
-      const lineTotal = qty * price;
+      const lineTotal = qty * (Number(item.price) || 0);
       subtotal += lineTotal;
-
       const li = document.createElement("li");
       li.className = "summary-item";
       li.innerHTML = `<span>${item.name} × ${qty}</span><span>${money(
@@ -81,7 +111,6 @@
       list.appendChild(li);
     });
 
-    // compute tax and total
     const tax = subtotal * TAX_RATE;
     const total = subtotal + tax;
 
@@ -95,7 +124,7 @@
       upsertSummaryRow(
         orderSummarySection,
         "taxRow",
-        `Tax (${(TAX_RATE * 100).toFixed(0)}%)`,
+        `Tax (${TAX_RATE * 100}%)`,
         money(tax)
       );
     }
@@ -122,24 +151,28 @@
     // collect inputs
     const name = document.getElementById("name").value.trim();
     const email = document.getElementById("email").value.trim();
+    // const phone = document.getElementById("phone").value.trim();
     const address = document.getElementById("address").value.trim();
     const city = document.getElementById("city").value.trim();
     const postcode = document.getElementById("postcode").value.trim();
-    const country = document.getElementById("country").value.trim();
 
-    const totalText = document.getElementById("totalAmount").textContent;
     const subtotalText =
       document.getElementById("subtotalRow")?.querySelector(".value")
         ?.textContent || "$0.00";
     const taxText =
       document.getElementById("taxRow")?.querySelector(".value")?.textContent ||
       "$0.00";
+    const totalText = document.getElementById("totalAmount").textContent;
 
-    // build order data
+    // 🔑 detect user_id
+    const userId = localStorage.getItem("user_id");
+
     const orderData = {
-      guest_name: name,
-      guest_email: email,
-      guest_address: `${address}, ${city} ${postcode}, ${country}`,
+      user_id: userId ? Number(userId) : null,
+      guest_name: name, // always include
+      guest_email: email, // always include
+      // guest_phone: phone, // always include
+      guest_address: `${address}, ${city} ${postcode}`, // always include
       subtotal: subtotalText.replace("$", ""),
       tax: taxText.replace("$", ""),
       total: totalText.replace("$", ""),
@@ -162,22 +195,24 @@
         if (data.success) {
           localStorage.removeItem("cart");
           form.style.display = "none";
-
-          const msg = document.getElementById("confirmationMessage");
-          msg.innerHTML = `✅ Thank you, <strong>${name}</strong>! Your order of <strong>${totalText}</strong> has been placed successfully.`;
-          msg.style.display = "block"; // show it only now
-
+          document.getElementById(
+            "confirmationMessage"
+          ).innerHTML = `✅ Thank you, <strong>${
+            name || "User"
+          }</strong>! Your order of <strong>${totalText}</strong> has been placed successfully.`;
+          document.getElementById("confirmationMessage").style.display =
+            "block";
           renderOrderSummary();
         } else {
           alert("Order failed: " + data.message);
         }
       })
       .catch((err) => console.error("Order error", err));
-  } // <-- properly closed handleSubmit
+  }
 
-  // ====== init ======
   document.addEventListener("DOMContentLoaded", () => {
     renderOrderSummary();
+    autofillUserDetails();
     const form = document.getElementById("checkoutForm");
     if (form) form.addEventListener("submit", handleSubmit);
   });

@@ -1,5 +1,5 @@
 <?php
-// /Online-store/php/me.php — return fresh user data from DB (includes phone)
+// /Online-store/php/me.php — return fresh user data including address & payment info
 header('Content-Type: application/json');
 session_start();
 
@@ -20,12 +20,15 @@ try {
 }
 
 $stm = $pdo->prepare("
-  SELECT user_id, username, email, role, first_name, last_name, phone
+  SELECT user_id, username, email, role,
+         first_name, last_name, phone,
+         address, city, postcode,
+         payment_method, card_number, card_expiry, cvv
   FROM users
   WHERE user_id = ?
   LIMIT 1
 ");
-$stm->execute([ (int)$_SESSION['user_id'] ]);
+$stm->execute([(int)$_SESSION['user_id']]);
 $row = $stm->fetch(PDO::FETCH_ASSOC);
 
 if (!$row) {
@@ -35,7 +38,7 @@ if (!$row) {
   exit;
 }
 
-// refresh session snapshot (optional but keeps things in sync)
+// refresh session snapshot (basic info only, don’t keep card/cvv in session)
 $_SESSION['username']   = $row['username'];
 $_SESSION['email']      = $row['email'];
 $_SESSION['role']       = $row['role'];
@@ -44,12 +47,19 @@ $_SESSION['last_name']  = $row['last_name'];
 $_SESSION['phone']      = $row['phone'];
 
 echo json_encode([
-  'ok'         => true,
-  'user_id'    => (int)$row['user_id'],
-  'username'   => $row['username'],
-  'email'      => $row['email'],
-  'role'       => $row['role'],
-  'first_name' => $row['first_name'],
-  'last_name'  => $row['last_name'],
-  'phone'      => $row['phone'],
+  'ok'             => true,
+  'user_id'        => (int)$row['user_id'],
+  'username'       => $row['username'],
+  'email'          => $row['email'],
+  'role'           => $row['role'],
+  'first_name'     => $row['first_name'],
+  'last_name'      => $row['last_name'],
+  'phone'          => $row['phone'],
+  'address'        => $row['address'],
+  'city'           => $row['city'],
+  'postcode'       => $row['postcode'],
+  'payment_method' => $row['payment_method'],
+  'card_number'    => $row['card_number'],   // ⚠️ mask on frontend
+  'card_expiry'    => $row['card_expiry'],
+  'cvv'            => $row['cvv'],           // ⚠️ never show raw CVV
 ]);

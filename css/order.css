@@ -1,0 +1,185 @@
+/* ===== Accept either #ordersSection or #orderSection for safety ===== */
+:is(#ordersSection, #orderSection).orders-section {
+  max-width: 1000px;
+  margin: 6rem auto 2rem;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+/* Title */
+:is(#ordersSection, #orderSection).orders-section h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.9rem;
+  color: #222;
+  font-weight: 600;
+}
+
+/* Container (list) */
+:is(#ordersSection, #orderSection) .orders-container {
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* Cards */
+:is(#ordersSection, #orderSection) .order-card {
+  padding: 1.2rem 1.5rem;
+  border-radius: 12px;
+  background: #f9fafc;
+  border: 1px solid #e0e0e0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+:is(#ordersSection, #orderSection) .order-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+/* Header */
+:is(#ordersSection, #orderSection) .order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.5rem;
+}
+:is(#ordersSection, #orderSection) .order-id {
+  font-weight: 700;
+  color: #444;
+  font-size: 1.05rem;
+}
+:is(#ordersSection, #orderSection) .order-date {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Status badge */
+:is(#ordersSection, #orderSection) .order-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+:is(#ordersSection, #orderSection) .status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+:is(#ordersSection, #orderSection) .status-completed {
+  background: #d4edda;
+  color: #155724;
+}
+:is(#ordersSection, #orderSection) .status-cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Font Awesome icons (if FA is loaded) */
+:is(#ordersSection, #orderSection) .status-pending::before,
+:is(#ordersSection, #orderSection) .status-completed::before,
+:is(#ordersSection, #orderSection) .status-cancelled::before {
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  display: inline-block;
+}
+:is(#ordersSection, #orderSection) .status-pending::before {
+  content: "\f017";
+} /* clock */
+:is(#ordersSection, #orderSection) .status-completed::before {
+  content: "\f00c";
+} /* check */
+:is(#ordersSection, #orderSection) .status-cancelled::before {
+  content: "\f00d";
+} /* times */
+
+/* Body text */
+:is(#ordersSection, #orderSection) .order-body {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #555;
+}
+:is(#ordersSection, #orderSection) .order-body strong {
+  color: #222;
+}
+
+/* Items block (collapsible) */
+:is(#ordersSection, #orderSection) .order-items {
+  margin-top: 1rem;
+}
+:is(#ordersSection, #orderSection) .order-items.hidden {
+  display: none;
+}
+:is(#ordersSection, #orderSection) .order-items h4 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Items table */
+.order-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 0.9rem;
+}
+.order-items-table th,
+.order-items-table td {
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+.order-items-table th {
+  background: #f5f5f5;
+  font-weight: 600;
+  color: #444;
+}
+.order-items-table tr:last-child td {
+  border-bottom: none;
+}
+.order-items-table tbody tr:hover {
+  background: #fafafa;
+}
+
+/* Toggle button */
+.toggle-items-btn {
+  margin-top: 0.8rem;
+  background: #007bff;
+  color: #fff;
+  border: 0;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+}
+.toggle-items-btn:hover {
+  background: #0056b3;
+}
+.order-items.hidden {
+  display: none;
+}
+
+.toggle-items-btn {
+  margin-top: 0.8rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+}
+
+.toggle-items-btn:hover {
+  background: #0056b3;
+}
