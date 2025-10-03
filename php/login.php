@@ -18,8 +18,9 @@ if (!is_array($input)) {
   $input = $_POST;
 }
 
-$email    = isset($input['email']) ? strtolower(trim($input['email'])) : '';
-$password = isset($input['password']) ? (string)$input['password'] : '';
+$email      = isset($input['email']) ? strtolower(trim($input['email'])) : '';
+$password   = isset($input['password']) ? (string)$input['password'] : '';
+$guestCart  = isset($input['guestCart']) && is_array($input['guestCart']) ? $input['guestCart'] : [];
 
 if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
   http_response_code(422);
@@ -79,7 +80,27 @@ $_SESSION['last_name']     = $user['last_name'];
 $_SESSION['email']         = $user['email'];
 $_SESSION['last_activity'] = time();
 
-/* ✅ Return all essential user data so frontend can store in localStorage */
+/* ✅ Merge guest cart into DB cart */
+// ✅ Merge guest cart into DB
+if (!empty($guestCart) && is_array($guestCart)) {
+  foreach ($guestCart as $item) {
+    $pid = (int)($item['id'] ?? 0);
+    $qty = (int)($item['quantity'] ?? 0);
+
+    if ($pid > 0 && $qty > 0) {
+      $stmt = $pdo->prepare("
+        INSERT INTO user_cart (user_id, product_id, quantity)
+        VALUES (?, ?, ?)
+        ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)
+      ");
+      $stmt->execute([$_SESSION['user_id'], $pid, $qty]);
+    }
+  }
+}
+
+error_log("guestCart: " . json_encode($guestCart));
+
+/* ✅ Return user data */
 echo json_encode([
   'ok'        => true,
   'message'   => 'Login successful',

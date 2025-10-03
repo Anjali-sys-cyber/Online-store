@@ -1,21 +1,21 @@
 class CartManager {
   constructor() {
-    this.cart = JSON.parse(localStorage.getItem("cart")) || [];
+    this.cart = [];
     this.cartItemsContainer = document.getElementById("cart-items");
     this.subtotalEl = document.getElementById("subtotal");
     this.taxEl = document.getElementById("tax");
     this.totalEl = document.getElementById("total");
     this.emptyCartEl = document.getElementById("empty-cart");
 
-    // Initialize after DOM is loaded
     this.init();
   }
 
-  init() {
+  async init() {
+    await this.loadCart(); // ✅ load from DB if logged in, else localStorage
     this.renderCart();
     this.updateCartDisplay();
 
-    // Event delegation for cart controls
+    // Event delegation
     if (this.cartItemsContainer) {
       this.cartItemsContainer.addEventListener("click", (e) => {
         const cartItem = e.target.closest(".cart-item");
@@ -33,24 +33,69 @@ class CartManager {
     }
   }
 
-  addToCart(product) {
+  async loadCart() {
+    try {
+      const res = await fetch("/Online-store/php/cart.php", {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ok && Array.isArray(data.cart)) {
+          this.cart = data.cart.map((item) => ({
+            id: parseInt(item.product_id),
+            name: item.name,
+            price: parseFloat(item.price),
+            image: item.image,
+            quantity: parseInt(item.quantity),
+          }));
+          localStorage.setItem("cart", JSON.stringify(this.cart)); // keep backup
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("[CartManager] Could not load from DB:", err);
+    }
+
+    // fallback → guest cart
+    this.cart = JSON.parse(localStorage.getItem("cart")) || [];
+  }
+
+  async addToCart(product) {
     const existingItem = this.cart.find((item) => item.id === product.id);
     if (existingItem) existingItem.quantity += 1;
     else this.cart.push({ ...product, quantity: 1 });
 
-    this.saveCart();
+    await this.saveCart();
     this.renderCart();
     this.updateCartDisplay();
     this.showNotification(`${product.name} added to cart!`);
   }
 
-  saveCart() {
+  async saveCart() {
+    // always keep local copy
     localStorage.setItem("cart", JSON.stringify(this.cart));
+
+    // try syncing with DB if logged in
+    try {
+      for (const item of this.cart) {
+        await fetch("/Online-store/php/cart.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            product_id: item.id,
+            quantity: item.quantity,
+          }),
+        });
+      }
+    } catch (err) {
+      console.warn("[CartManager] DB sync failed:", err);
+    }
   }
 
   updateCartDisplay() {
     const cartCount = document.querySelector(".cart-count");
-    const cartTotal = document.querySelector(".cart-total"); // Select the total span
+    const cartTotal = document.querySelector(".cart-total");
 
     const totalItems = this.cart.reduce((sum, item) => sum + item.quantity, 0);
     const totalPrice = this.cart.reduce(
@@ -59,7 +104,7 @@ class CartManager {
     );
 
     if (cartCount) cartCount.textContent = totalItems;
-    if (cartTotal) cartTotal.textContent = `($${totalPrice.toFixed(2)})`; // Update total price
+    if (cartTotal) cartTotal.textContent = `($${totalPrice.toFixed(2)})`;
   }
 
   renderCart() {
@@ -96,24 +141,37 @@ class CartManager {
     this.updateSummary();
   }
 
-  changeQuantity(id, delta) {
+  async changeQuantity(id, delta) {
     const item = this.cart.find((i) => i.id === id);
     if (!item) return;
 
     item.quantity += delta;
-    if (item.quantity <= 0) this.removeItem(id);
-    else {
-      this.saveCart();
+    if (item.quantity <= 0) {
+      await this.removeItem(id);
+    } else {
+      await this.saveCart();
       this.renderCart();
       this.updateCartDisplay();
     }
   }
 
-  removeItem(id) {
+  async removeItem(id) {
     this.cart = this.cart.filter((i) => i.id !== id);
-    this.saveCart();
+    await this.saveCart();
     this.renderCart();
     this.updateCartDisplay();
+
+    // delete from DB explicitly
+    try {
+      await fetch("/Online-store/php/cart.php", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ product_id: id }),
+      });
+    } catch (err) {
+      console.warn("[CartManager] Failed to delete from DB:", err);
+    }
   }
 
   updateSummary() {
@@ -121,7 +179,7 @@ class CartManager {
       (sum, i) => sum + i.price * i.quantity,
       0
     );
-    const tax = subtotal * 0.1; // 10%
+    const tax = subtotal * 0.1;
     const total = subtotal + tax;
 
     if (this.subtotalEl)
@@ -143,7 +201,6 @@ class CartManager {
   }
 }
 
-// Initialize after DOM content is loaded
 document.addEventListener("DOMContentLoaded", () => {
   window.cartManager = new CartManager();
 });

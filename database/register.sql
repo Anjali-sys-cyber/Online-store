@@ -106,6 +106,19 @@ ALTER TABLE orders
 ALTER TABLE order_items 
   MODIFY order_item_id INT(11) NOT NULL AUTO_INCREMENT;
 
+CREATE TABLE user_cart (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  product_id INT UNSIGNED NOT NULL,
+  quantity INT DEFAULT 1,
+  added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY (user_id, product_id),
+  CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+ALTER TABLE user_cart 
+  MODIFY product_id INT(11) NOT NULL;
+
 
 delete from cart;
 delete from order_items;

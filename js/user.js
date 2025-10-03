@@ -150,21 +150,6 @@
     }
   }
 
-  // ----- Home view -----
-  function renderHomeDashboard() {
-    dashboardContent.innerHTML = `
-      <section id="homeContent">
-        <h2>Welcome Back</h2>
-        <p>Check out the latest products and offers!</p>
-        <div class="product-container"></div>
-      </section>`;
-    const renderer = new ProductRenderer(
-      ".product-container",
-      window.cartManager
-    );
-    renderer.loadProducts();
-  }
-
   // ----- Orders view -----
   async function renderOrdersView() {
     dashboardContent.innerHTML = `
@@ -260,12 +245,56 @@
   async function loadPage(page) {
     if (page === "dashboard") {
       dashboardContent.innerHTML = `
-        <section>
-          <h2>Welcome to the User Dashboard</h2>
-          <p>Select an option from the Navbar.</p>
-        </section>`;
-    } else if (page === "homeContent") {
-      renderHomeDashboard();
+       <section class="dashboard-hero">
+        <div class="hero-text">
+          <h1>👋 Welcome Back</h1>
+          <p>Explore new arrivals, track your orders, and manage your profile.</p>
+        </div>
+      </section>
+
+      <section class="dashboard-stats">
+        <div class="dash-card" data-page="orders">
+          <i class="fas fa-box"></i>
+          <h3>My Orders</h3>
+          <p>Track your past & current orders</p>
+        </div>
+        <div class="dash-card" data-page="cart">
+          <i class="fas fa-shopping-cart"></i>
+          <h3>Cart</h3>
+          <p>Continue shopping your saved items</p>
+        </div>
+        <div class="dash-card" data-page="profile">
+          <i class="fas fa-user"></i>
+          <h3>Profile</h3>
+          <p>Manage your personal details</p>
+        </div>
+      </section>
+
+      <section class="dashboard-latest">
+        <h2>🔥 Latest Products</h2>
+        <div class="product-container"></div>
+      </section>
+      `;
+
+      // Make the cards clickable
+      // Make the cards clickable
+      dashboardContent.querySelectorAll(".dash-card").forEach((card) => {
+        card.addEventListener("click", () => {
+          if (card.dataset.page === "cart") {
+            // ✅ redirect to standalone cart page
+            window.location.href = "/Online-store/pages/cart.html";
+          } else {
+            loadPage(card.dataset.page);
+          }
+        });
+      });
+
+      // Render latest products
+      const renderer = new ProductRenderer(
+        ".product-container",
+        window.cartManager
+      );
+      renderer.loadProducts({ limit: 6, sortByNew: true });
     } else if (page === "orders") {
       await renderOrdersView();
     } else if (page === "profile") {

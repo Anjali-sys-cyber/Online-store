@@ -53,3 +53,49 @@
   border-radius: 8px;
   margin-bottom: 15px;
 }
+
+/* dashboard section */
+.dashboard-hero {
+  background: linear-gradient(135deg, #1a2797, #4f8cff);
+  color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+.dashboard-hero h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+.dashboard-hero p {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.dash-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+.dash-card:hover {
+  transform: translateY(-5px);
+}
+.dash-card i {
+  font-size: 2rem;
+  color: #1a2797;
+  margin-bottom: 0.5rem;
+}
+.dashboard-latest h2 {
+  margin-bottom: 1rem;
+}
+
+/* ---------------------- */

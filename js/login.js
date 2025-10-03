@@ -47,11 +47,25 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error("Invalid email address");
       }
 
+      // ✅ Capture guest cart from localStorage before login
+      const guestCart = localStorage.getItem("cart");
+      let parsedCart = [];
+      try {
+        parsedCart = guestCart ? JSON.parse(guestCart) : [];
+      } catch {
+        parsedCart = [];
+      }
+
       const res = await fetch("/Online-store/php/login.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ email, password, remember }),
+        body: JSON.stringify({
+          email,
+          password,
+          remember,
+          guestCart: parsedCart,
+        }),
       });
 
       const text = await res.text();
@@ -66,7 +80,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!res.ok || !data.ok) throw new Error(data.error || "Login failed");
 
-      // Save user details so we can use them later
+      // ✅ Clear guest cart after merge
+      localStorage.removeItem("cart");
+
+      // Save user details
       localStorage.setItem("user", JSON.stringify(data));
       if (remember) {
         sessionStorage.setItem("user", JSON.stringify(data));
